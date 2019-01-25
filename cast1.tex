@@ -158,50 +158,115 @@ $$
     + \underbrace{\E_{x,y} \left[ (h^\star(x) - y)^2 \right]}_{\text{výchylka}}.
 $$
 
-Prvý zo sčítancov budeme volať \emph{rozptyl}. Vyjadruje, ako ďaleko je naša
-funkcia od najlepšej možnej, vrámci množiny hypotéz $H$. Druhý zo sčítancov
-budeme volať \emph{výchylka}. Vyjadruje chybu, ktorá je spôsobená výberom
-množiny hypotéz.
+Prvý zo sčítancov budeme volať \emph{rozptyl}. Trénovací algoritmus
+s malým rozptylom vracia funkcie, ktoré sú blízko optima v množine $H$.
+Tým, že mu zväčšíme množinu trénovacích dát, si veľmi neprilepšíme.
+Naopak, algoritmus s veľkým rozptylom vracia funkcie ďaleko od optima,
+teoreticky by sme sa teda vedeli k optimu priblížiť tým, že zväčšíme
+množstvo trénovacích dát.
 
-Výchylku vieme upraviť ďalej. Pretože hypotéza $h^\star$ ani $y$ nezávisia od
-trénovacej množiny $T$, merať chybu na testovacích dátach $x, y$ je to
-isté, ako merať ju na trénovacích dátach $x_i, y_i$, berúc ich náhodný
-výber. Teda
+\medskip
+
+Druhý zo sčítancov budeme volať \emph{výchylka}. Vyjadruje chybu, ktorá
+je spôsobená tým, že sa náš algoritmus obmedzil na nejakú konkrétnu
+množinu hypotéz $H$. Čím väčšia množina hypotéz, tým menšia výchylka
+(nakoľko $h^\star$ je najlepšia hypotéza v množine $H$, jej zväčšením
+si môžeme iba prilepšiť). Zložitejšia množina hypotéz ale ľahšie
+``napasuje'' na ľubovoľné trénovacie dáta. To zvyšuje riziko toho,
+že výsledná hypotéza bude špecifická pre obdržané dáta, a nebude
+schopná zovšeobecňovať mimo nich. Je teda potreba väčšieho množstva
+trénovacích dát.
+
+\medskip
+
+Ak máme fixné trénovacie dáta $T$, pri voľbe množiny hypotéz $H$ sa snažíme
+nájsť kompromis medzi malým rozptylom a malou výchylkou. Zložité $H$
+bude mať malú výchylku ale veľký rozptyl, čo vedie k tzv. \emph{preučeniu}.
+Jednoduché $H$ bude mať malý rozptyl, ale veľkú výchylku, tzv. \emph{podučenie}.
+
+Na obrázku \ref{img:fitting} ilustrujeme oba koncepty: úlohou je modelovať
+kvadratickú funkciu. Ak za množinu hypotéz zvolíme lineárne funkcie,
+ich chyby sa nebudú veľmi od seba líšiť, ale všetky budú zle. Ak za
+množinu hypotéz zvolíme polynómy nejakého vysokého stupňa, ľahko
+nájdeme polynóm prechádzajúci cez trénovacie dáta, avšak mimo nich
+bude dávať výsledky úplne mimo.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.3\linewidth}
+    \includegraphics[width=\linewidth]{obrazky/fitting1.pdf}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[width=\linewidth]{obrazky/fitting9.pdf}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[b]{0.3\textwidth}
+    \includegraphics[width=\linewidth]{obrazky/fitting2.pdf}
+  \end{subfigure}
+  \caption{Podučenie, preučenie, akurát.}
+  \label{img:fitting}
+\end{figure}
+
+\medskip
+
+Výchylku vieme upraviť ďalej. Hypotéza $h^\star$ ani $y$ nezávisia
+od trénovacej množiny $T$. Z ich pohľadu sú teda testovacie dáta $x, y$
+a trénovacie dáta $x_i, y_i$ nerozoznateľné. Takže na meranie chyby
+$h^\star$ môžeme použiť trénovacie dáta (berúc v úvahu ich náhodný
+výber):
 \begin{align}
   \vychylka
     &= \E_T \left[ \E_{x_i, y_i} \left[ (h^\star(x_i) - y_i)^2 \right] \right] \\
     &= \E_T \left[ \E_{x_i, y_i} \left[ \left( (h^\star(x_i) - \hat{h}(x_i)) + (\hat{h}(x_i) - y_i) \right)^2 \right] \right]
 \end{align}
-Opäť, použitím toho istého technického kroku dostaneme:
+Použitím ďalšieho technického kroku dostaneme:
 \begin{align}
   \vychylka &= \underbrace{\E_T \left[ \E_{x_i, y_i} \left[ (h^\star(x_i) - \hat{h}(x_i))^2 \right] \right]}_{\text{trénovací rozptyl}}
     + \underbrace{\E_T \left[ \E_{x_i, y_i} \left[ (\hat{h}(x_i) - y_i)^2 \right] \right]}_{\text{priemerná trénovacia chyba}}
 \end{align}
 
-Trénovací rozptyl vyjadruje, ako ďaleko je naša hypotéza $\hat{h}$
-od najlepšej možnej $h^\star$ z $H$. Na rozdiel od rozptylu ale túto
-vzdialenosť meriame na trénovacích dátach, nie na testovacích. To spraví
-rozdiel, nakoľko $\hat{h}$ je závislé od trénovacích dát.
-Priemerná trénovacia chyba je priemerná chyba, ktorej sa dopustí výstup
-z algoritmu $\hat{h}$ na tých istých dátach, pomocou ktorých sme $\hat{h}$
-zostrojili.
+Prvý zo sčítancov budeme volať \emph{trénovací rozptyl}.
+Uvedomme si, že pre ľubovoľné trénovacie dáta $T$ platí
+$$\err_T(\hat{h}) \leq \err_T(h^\star),$$
+nakoľko $\hat{h}$ je optimálna hypotéza pre danú množinu trénovacích
+dát. Hypotéza $h$ síce je najlepšia pre $H$, trénovacie dáta sú ale len
+malá vzorka z $H$.
+Trénovací rozptyl teda môžeme chápať ako mieru toho, ako veľmi
+reprezentatívnu vzorku trénovacích dát sme dostali. Čím menší je,
+tým viac reprezentatívna vzorka je.
 
+\medskip
 
-\paragraph{Závery.}
-Podarilo sa nám teda rozložiť chybu algoritmu na dve, prípadne tri časti.
-Načo je to ale dobré? Ukážeme si, ako pomocou nich vieme získať intuíciu
-o tom, ako sa správa chyba algoritmu v závislosti od veľkosti trénovacej
-množiny a veľkosti (tj. zložitosti) množiny hypotéz.
+Druhý zo sčítancov budeme volať \emph{priemerná trénovacia chyba}.
+Je to priemerná chyba, ktorej sa dopustí výstu z algoritmu $\hat{h}$
+na tých istých dátach, pomocou ktorých sme $\hat{h}$ zostrojili.
+
+\medskip
+
+Platí
+$$ {\normalfont \text{priemerná trénovacia chyba}} \leq \vychylka \leq \chalg. $$
+Na konkrétnych trénovacích dátach ale nemusí platiť, že trénovacia
+chyba je menšia ako testovacia chyba: mohli sme si (síce s malou
+pravdepodobnosťou, ale predsa) vytiahnuť zlé trénovacie dáta, ktoré
+sa výrazne líšia od skutočných dát.
+
+\medskip
+
+Na základe dosiaľ uvedeného vieme graficky znázorniť, ako sa zhruba správajú
+rozptyl, výchylka, trénovací rozptyl a priemerná trénovacia chyba,
+v závislosti od veľkosti trénovacej množiny (obrázok \ref{img:train})
+a od zložitosti množiny hypotéz (obrázok \ref{img:hypo}).
+
 
 \TODO{obrázok kriviek učenia, vysvetlenie}
-\TODO{podučenie, preučenie}
 
 
 \paragraph{Technické detaily.}
 Nakoniec sa vyjadríme k spomínanému technickému kroku. Začneme jeho
 znením a potom uvedieme jeho predpoklady.
 
-\begin{theorem}
+\begin{theorem} \label{theorem:proj1}
   Predpokladajme, že vstupom do hypotéz sú vektory reálnych čísel
   (tj. $X = \reals^n$), cieľom je predpovedať jedno reálne číslo
   (tj. $Y = \reals$), a že pravdepodobnostné rozdelenie $P$ je spojité.
@@ -225,10 +290,15 @@ znením a potom uvedieme jeho predpoklady.
 \end{remark}
 \begin{remark}
   Všimnite si, že potrebujeme uzavretosť množiny $H$ na limity na to,
-  aby bolo $\argmin_{h \in H} (\ldots)$ dobre definované. Vo všeobecnosti
+  aby vôbec $\argmin_{h \in H} (\ldots)$ existovalo. Vo všeobecnosti
   nemusí existovať taká funkcia, ale môže existovať nekonečná postupnosť
   funkcii, každá ďalšia lepšia, ako tá predchádzajúca. (Inak povedané,
   neexistuje minimum, iba infimum.)
+\end{remark}
+\begin{remark}
+  Je namieste otázka, či je $\argmin_{h \in H} (\ldots)$ dobre definované,
+  teda či je taká funkcia $h$ práve jedna. Za chvíľu uvidíme, že naše
+  predpoklady to zaručujú.
 \end{remark}
 \begin{remark}
   Veta by sa dala rozšíriť aj na iné množiny $X, Y$, napríklad keď
@@ -300,12 +370,16 @@ v nasledujúcom odseku. Skúsený čitateľ-matematik ho môže preskočiť.
 \end{proof}
 
 \begin{definition}
-  (Projekcia na množinu.) Nech $H$ je množina funkcii, ktorá je uzavretá
-  na lineárne kombinácie a na limity, a nech $f$ je funkcia.
-  \emph{Projekciu} funkcie $f$ na množinu $H$ budeme označovať $f_H$
-  a budeme pod ňou rozumieť nasledovný výraz:
+  (Projekcia na množinu.) \emph{Projekciu} funkcie $f$ na množinu $H$
+  budeme označovať $f_H$ a budeme pod ňou rozumieť nasledovný výraz:
   $$f_H = \argmin_{h \in H} d(f, h)$$
 \end{definition}
+
+\begin{remark}
+  Ako sa už spomínalo, nie je zrejmé, že projekcia je dobre definovaná.
+  Preto v nasledujúcej lemme definujeme $f_H$ trochu iným spôsobom, ako
+  jednu z možno viacerých funkcii, ktoré minimalizujú vzdialenosť k $H$.
+\end{remark}
 
 \begin{lemma}
   (Kolmosť projekcie.) Pre ľubovoľnú funkciu $h \in H$ platí $h \perp f - f_H$.
@@ -341,7 +415,71 @@ v nasledujúcom odseku. Skúsený čitateľ-matematik ho môže preskočiť.
   To je nenulové, nakoľko $h \not \perp f - f_H$. Čo je hľadaný spor.
 \end{proof}
 
-\TODO{dokončiť dôkaz}
+\begin{lemma}
+  Projekcia na množinu $H$ je dobre definovaná, teda vždy existuje
+  nanajvýš jedna funkcia $f_H \in H$, ktorá minimalizuje vzdialenosť
+  k $f$.
+\end{lemma}
+\begin{proof}
+  Predpokladajme, že také funkcie sú dve, označme ich $g, h$. Ukážeme,
+  že potom nutne $g = h$.
+  
+  Podľa predchádzajúcej lemmy platí
+  \begin{align}
+    f - g \perp g,\ \text{odkiaľ} &\langle f - g, g \rangle = 0 \\
+                                  &\langle f - h, g \rangle = 0 \\
+                                  &\langle f - g, h \rangle = 0 \\
+                                  &\langle f - h, h \rangle = 0
+  \end{align}
+  Z týchto rovností dostaneme
+  $$\langle g, g \rangle = \langle g, h \rangle = \langle h, g \rangle = \langle h, h \rangle.$$
+  Nakoniec, pozrime sa na normu funkcie $g - h$:
+  \begin{align}
+    \norm{g - h}
+      &= \sqrt{\langle g - h, g - h \rangle} \\
+      &= \sqrt{\langle g, g \rangle - \langle g, h \rangle - \langle h, g \rangle + \langle h, h \rangle} \\
+      &= 0
+  \end{align}
+  To môže nastať jedine vtedy, keď $g = h$.
+\end{proof}
+
+\begin{lemma}
+  Hypotéza $h^\star$ je projekciou $h^\square$ na $H$, teda $h^\star = h^\square_H$.
+\end{lemma}
+\begin{proof}
+  Vychádzajme z definície $h^\star$.
+  \begin{align}
+    h^\star
+      &= \argmin_{h \in H} \E_{x,y} \left[ (h(x) - y)^2 \right] \\
+      &= \argmin_{h \in H} \E_{x,y} \left[ \left( (h(x) - h^\square(x)) + (h^\square(x) - y) \right)^2 \right] \\
+      &= \argmin_{h \in H} \left(
+        \begin{array}{ll}
+          &\E_{x,y} \left[ (h(x) - h^\square(x))^2 \right] \\
+          + &\E_{x,y} \left[ (h^\square(x) - y)^2 \right] \\
+          + 2 \cdot &\E_{x,y} \left[ (h(x) - h^\square(x)) \cdot (h^\square(x) - y) \right]
+        \end{array}
+        \right)
+  \end{align}
+  Druhý sčítanec je konštanta, teda nám $\argmin$ nijak neovplyvňuje.
+  Tretí sčítanec vieme upraviť nasledovne:
+  \begin{align}
+    \text{tretí sčítanec}
+      &= \E_x \left[ \E_{y|x} \left[ (h(x) - h^\square(x)) \cdot (h^\square(x) - y) \right] \right] \\
+      &= \E_x \left[ (h(x) - h^\square(x)) \cdot \E_{y|x} \left[ h^\square(x) - y \right] \right] \\
+      &= 0
+  \end{align}
+  A teda je to tiež konštanta. Dostávame tak
+  $$h^\star = \argmin_{h \in H} \E_{x,y} \left[ (h(x) - h^\square(x))^2 \right],$$
+  čo je presne definícia projekcia $h^\square$ na množinu $H$.
+\end{proof}
+
+
+
+Vyzbrojení týmito znalosťami, môžeme sa vrhnúť na dôkaz vety \ref{theorem:proj1}.
+
+\begin{proof}
+  Uvedomme si, že
+\end{proof}
 
 
 
@@ -431,7 +569,6 @@ Ukážeme a odvodíme si ho.
       + \underbrace{\Var(\varepsilon)}_{\text{\normalfont šum}}
   $$
 \end{proof}
-
 
 
 
