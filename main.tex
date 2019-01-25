@@ -1,0 +1,55 @@
+\documentclass[a4paper,11pt,oneside]{book}
+
+% slovenske pisanie
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[slovak]{babel}
+
+% mensie okraje
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\usepackage{amssymb}
+\usepackage{amsmath}
+
+\usepackage{amsthm}
+\theoremstyle{plain}
+\newtheorem{theorem}{Veta}
+\newtheorem{lemma}{Lemma}
+\theoremstyle{remark}
+\newtheorem{remark}{Poznámka}
+\theoremstyle{definition}
+\newtheorem{definition}{Definícia}
+
+\usepackage{xcolor} % \color
+\usepackage{graphicx} % obrazky
+
+\newcommand{\err}{\mathrm{err}}
+\newcommand{\norm}[1]{\left\lVert#1\right\rVert}
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\complex}{\mathbb{C}}
+
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\prob}{\mathrm{P}}
+\DeclareMathOperator*{\E}{\mathrm{E}}
+\DeclareMathOperator*{\Var}{\mathrm{Var}}
+\DeclareMathOperator*{\Cov}{\mathrm{Cov}}
+
+\newcommand{\vychylka}{\text{\normalfont výchylka}}
+\newcommand{\rozptyl}{\text{\normalfont rozptyl}}
+\newcommand{\chalg}{\text{\normalfont chyba algoritmu}}
+
+
+\newcommand{\TODO}[1]{\noindent {\color{red} TODO #1} \\}
+
+
+\begin{document}
+  
+  \tableofcontents
+  \newpage
+  
+  \input{cast1.tex}
+  \input{cast2.tex}
+  
+\end{document}

@@ -1,0 +1,443 @@
+\chapter{Teória strojového učenia I}
+
+Chceme sa naučiť na základe nejakých vstupných dát $x$ predikovať $y$.
+Môžeme si to predstaviť tak, že príroda vie poskytovať pozorovania,
+každé v tvare dvojice $(x, y)$. Dostali sme od nej sadu $t$ pozorovaní,
+na základe ktorých chceme navrhnúť nejakú funkciu $h$, ktorá predpovedá
+$y$ na základe $x$. Dobrá funkcia je taká, ktorá je schopná
+\emph{zovšeobecňovať}, teda sa jej ``dobré darí'' aj na dátach mimo
+trénovacej množiny. Proces, ktorým $h$ zostrojíme, si môžeme predtaviť
+ako algoritmus, ktorý berie ako vstupy trénovacie dáta a vráti nám
+funkciu.
+
+
+
+
+\section{Matematický model}
+
+Z matematického hľadiska, prírodu vieme formalizovať ako
+pravdepodobnostnú distribúciu $P$. Množinu všetkých možných
+$x$ označíme $X$, množinu možných $y$ označíme $Y$.
+
+V tejto časti sa nebudeme zaoberať výpočtovou stránkou strojového
+učenia, od detailov ako časová zložitosť, ..., abstrahujeme. Algoritmus
+si teda predstavíme iba ako niečo, čo vezme ako vstup trénovacie dáta
+$(x_1, y_1), \ldots, (x_t, y_t)$ a na výstup vráti funkciu
+$h : X \to Y$. Túto funkciu budeme volať \emph{hypotéza}. Množinu
+všetkých možných funkcii, ktoré môže náš algoritmus vrátiť,
+budeme volať \emph{množina hypotéz} a značiť ho $H$.
+
+\paragraph{Chyba hypotézy.}
+Ako vyjadriť mieru toho, že sa funkcii ``dobre darí''? Spravíme tak
+pomocou \emph{chybovej funkcie} $\err : Y \times Y \to \reals^+$,
+ktorej význam je nasledovný: $\err(y, y')$ vyjadruje, ako veľmi
+sa od seba líšia $y$ a $y'$. Pomocou tejto funkcie vieme odmerať
+priemernú chybu hypotézy $h$, ktorú budeme tiež označovať $\err$,
+nasledovne:
+$$\err(h) = \E_{x, y} \left[ \err(h(x), y) \right]$$
+Pod $\E_{x, y}$ sa rozumie stredná hodnota cez $(x, y)$
+z pravdepodobnostnej distribúcie $P$, teda $(x, y) \sim P$.
+Pri klasifikácii sa zvykne používať chybová funkcia
+$$
+  \err(y, y') = \left\{
+    \begin{array}{ll}
+      0, & \text{ak}\ y = y' \\
+      1, & \text{inak}
+    \end{array}
+  \right.
+$$
+a potom zrejme
+$$\E_{x, y} \left[ \err(h(x), y) \right] = \prob_{x, y} \left( h(x) \neq y \right).$$
+Pri regresii máme viacero možností, bežné voľby sú kvadratická chyba
+$(y - y')^2$ a absolútna chyba $|y - y'|$.
+
+\paragraph{Chyba algoritmu.}
+Ako vyjadriť chybu celého učiaceho algoritmu? Uvedomme si, že výstup
+algoritmu je závislý od trénovacích dát $T = \{(x_1, y_1), \ldots, (x_t, y_t)\}$,
+ktoré dostane. Takže výstupná funkcia je od nich závislá, budeme ju
+označovať $\hat{h}$. Potom priemerná chyba algoritmu (alebo inak
+\emph{priemerná chyba priemernej hypotézy}), braná cez všetky možné
+vzorky trénovacích dát, je rovná
+$$\E_T \left[ \err(\hat{h}) \right] = \E_T \left[ \E_{x,y} \left[ \err(\hat{h}(x), y) \right] \right].$$
+Pod $\E_T$ sa rozumie stredná hodnota cez všetky možné $t$-tice
+trénovacích dát $T$, brané nezávisle z pravdepodobnostnej
+distribúcie $P$.
+
+\paragraph{Trénovacia chyba.}
+Pri vyššie uvedených chybách sme vždy merali vzhľadom na skutočnú
+distribúciu $P$. Môže nás ale zaujímať, aká je priemerná chyba
+hypotézy na trénovacích dátach $T$. Túto chybu budeme označovať
+$\err_T(h)$, a vypočítame ju ako
+$$\err_T(h) = \E_{x_i, y_i} \left[ \err(h(x_i), y_i) \right] = \frac{1}{t} \cdot \sum_{i=1}^t \err(h(x_i), y_i).$$
+
+Priemerná trénovacia chyba z pohľadu algoritmu bude
+$$\E_T \left[ \err_T(\hat{h}) \right].$$
+
+V nasledujúcom texte budeme vynechávať premenné, cez ktoré prebiehajú
+stredné hodnoty, všade tam, kde budú zrejmé z kontextu.
+
+
+
+
+\section{Analýza veľkostí chýb}
+
+V tejto časti sa podrobnejšie pozrieme na to, ako závisia vyššie
+uvedené štatistiky (tj. priemerná testovacia a trénovacia chyba
+priemernej hypotézy) od veľkosti trénovacej množiny $T$ a od veľkosti
+množiny hypotéz $H$.
+
+V celej časti budeme predpokladať, že úloha je regresného
+charakteru a chyba sa meria ako kvadratická odchýlka, teda
+$$\err(y, y') = (y - y')^2.$$
+
+
+
+\subsection{Teoretické limity}
+Najprv sa ale pozrieme na teoretické limity toho, ako dobrá vôbec
+môže nejaká funkcia byť. Označme $h^{\square}$ najlepšiu možnú funkciu,
+nemusí byť nutne z $H$. Teda
+$$h^{\square} = \argmin_h \left( \err(h) \right) = \argmin_h \left( \E_{x,y} \left[ (h(x) - y)^2 \right] \right).$$
+Jediné obmedzenia kladené na $h$ sú, že je to funkcia: pre každé $x$
+musí vrátiť vždy jednu a tú istú hodnotu. Distribúcia $P$ ale nemusí
+pre dané $x$ vždy vrátiť to isté $y$: môže byť zašumená, alebo
+jednoducho $x$ neobsahuje dostatočnú informáciu. Napríklad, ak podľa
+plochy bytu určujeme jeho cenu, niektoré dva byty môžu mať rovnakú
+plochu a predsa rôznu cenu. Ako uvidíme, tento nedeterminizmus je
+jediný dôvod, prečo hypotéza $h^{\square}$ nemusí mať nulovú chybu.
+
+Chybu ľubovoľnej hypotézy $h$ vieme upraviť nasledovne:
+\begin{align}
+  \err(h)
+    &= \E_{x,y} \left[ (h(x) - y)^2 \right] \\
+    &= \E_{x} \left[ \E_{y|x} \left[ (h(x) - y)^2 \right] \right]
+\end{align}
+Pozrime sa na vnútornú strednú hodnotu. V nej je $x$ konštanta, a
+teda aj $h(x) = c$ je konštanta. Aká konštanta minimalizuje danú
+strednú hodnotu? Nie je ťažké vidieť (napríklad zderivovaním), že
+minimum sa nadobúda pre $c = \E[y]$. Takže
+$$h^{\square}(x) = \E_{y|x}[y],$$
+a jeho priemerná chyba je
+$$\err(h^{\square}) = \E_{x} \left[ \E_{y|x} \left[ (y - \E[y]) \right] \right] = \E_{x} \left[ \Var_{y|x}(y) \right].$$
+Vidíme teda, že pokiaľ je $y$ jednoznačne určené $x$-om, tak
+$h^{\square}$ bude mať nulovú chybu.
+
+
+
+\subsection{Bias-variance tradeoff}
+V tomto odseku si ukážeme zaujímavý výsledok, ktorý nám za určitých
+predpokladov umožňuje vyjadriť chyby pomocou iných, jasnejších veličín:
+tzv. \emph{výchylky} a \emph{rozptylu}.
+
+
+\paragraph{Odvodenie.}
+Označme najlepšiu hypotézu z množiny $H$ ako $h^\star$, teda
+$$h^\star = \argmin_h \left( \err(h) \right).$$
+
+Budeme upravovať výraz reprezentujúci priemernú chybu priemernej
+hypotézy $\hat{h}$.
+\begin{align}
+  \chalg % \E_T \left[ \err(\hat{h}) \right]
+    &= \E_T \left[ \err(\hat{h}) \right] \\
+    &= \E_T \left[ \E_{x,y} \left[ (\hat{h}(x) - y)^2 \right] \right] \\
+    &= \E_T \left[ \E_{x,y} \left[ \left( (\hat{h}(x) - h^\star(x)) + (h^\star(x) - y) \right)^2 \right] \right]
+\end{align}
+V tomto momente prichádza netriviálny technický krok, ktorý si
+vyžaduje dodatočné predpoklady. Tieto technické detaily prenecháme
+na koniec časti, sústreďme sa na to hlavné.
+$$
+  \chalg
+    = \E_T \left[ \E_{x,y} \left[ (\hat{h}(x) - h^\star(x))^2 \right] \right]
+    + \E_T \left[ \E_{x,y} \left[ (h^\star(x) - y)^2 \right] \right]
+$$
+Druhý zo sčítancov sa dá ešte zjednodušiť. Kedže $h^\star$ ani $y$
+nezávisia od trénovacích dát, môžeme sa zbaviť vonkajšej strednej
+hodnoty. Dostávame tak výslednú rovnosť
+$$
+  \chalg
+    = \underbrace{\E_T \left[ \E_{x,y} \left[ (\hat{h}(x) - h^\star(x))^2 \right] \right]}_{\text{rozptyl}}
+    + \underbrace{\E_{x,y} \left[ (h^\star(x) - y)^2 \right]}_{\text{výchylka}}.
+$$
+
+Prvý zo sčítancov budeme volať \emph{rozptyl}. Vyjadruje, ako ďaleko je naša
+funkcia od najlepšej možnej, vrámci množiny hypotéz $H$. Druhý zo sčítancov
+budeme volať \emph{výchylka}. Vyjadruje chybu, ktorá je spôsobená výberom
+množiny hypotéz.
+
+Výchylku vieme upraviť ďalej. Pretože hypotéza $h^\star$ ani $y$ nezávisia od
+trénovacej množiny $T$, merať chybu na testovacích dátach $x, y$ je to
+isté, ako merať ju na trénovacích dátach $x_i, y_i$, berúc ich náhodný
+výber. Teda
+\begin{align}
+  \vychylka
+    &= \E_T \left[ \E_{x_i, y_i} \left[ (h^\star(x_i) - y_i)^2 \right] \right] \\
+    &= \E_T \left[ \E_{x_i, y_i} \left[ \left( (h^\star(x_i) - \hat{h}(x_i)) + (\hat{h}(x_i) - y_i) \right)^2 \right] \right]
+\end{align}
+Opäť, použitím toho istého technického kroku dostaneme:
+\begin{align}
+  \vychylka &= \underbrace{\E_T \left[ \E_{x_i, y_i} \left[ (h^\star(x_i) - \hat{h}(x_i))^2 \right] \right]}_{\text{trénovací rozptyl}}
+    + \underbrace{\E_T \left[ \E_{x_i, y_i} \left[ (\hat{h}(x_i) - y_i)^2 \right] \right]}_{\text{priemerná trénovacia chyba}}
+\end{align}
+
+Trénovací rozptyl vyjadruje, ako ďaleko je naša hypotéza $\hat{h}$
+od najlepšej možnej $h^\star$ z $H$. Na rozdiel od rozptylu ale túto
+vzdialenosť meriame na trénovacích dátach, nie na testovacích. To spraví
+rozdiel, nakoľko $\hat{h}$ je závislé od trénovacích dát.
+Priemerná trénovacia chyba je priemerná chyba, ktorej sa dopustí výstup
+z algoritmu $\hat{h}$ na tých istých dátach, pomocou ktorých sme $\hat{h}$
+zostrojili.
+
+
+\paragraph{Závery.}
+Podarilo sa nám teda rozložiť chybu algoritmu na dve, prípadne tri časti.
+Načo je to ale dobré? Ukážeme si, ako pomocou nich vieme získať intuíciu
+o tom, ako sa správa chyba algoritmu v závislosti od veľkosti trénovacej
+množiny a veľkosti (tj. zložitosti) množiny hypotéz.
+
+\TODO{obrázok kriviek učenia, vysvetlenie}
+\TODO{podučenie, preučenie}
+
+
+\paragraph{Technické detaily.}
+Nakoniec sa vyjadríme k spomínanému technickému kroku. Začneme jeho
+znením a potom uvedieme jeho predpoklady.
+
+\begin{theorem}
+  Predpokladajme, že vstupom do hypotéz sú vektory reálnych čísel
+  (tj. $X = \reals^n$), cieľom je predpovedať jedno reálne číslo
+  (tj. $Y = \reals$), a že pravdepodobnostné rozdelenie $P$ je spojité.
+  
+  Nech množina hypotéz $H$ je uzavretá na lineárne kombinácie a na
+  limity (teda ak postupnosť funkcii v $H$ konverguje, jej limita
+  je tiež v $H$).
+  
+  Ďalej predpokladajme, že trénovací algoritmus vždy vráti takú funkciu
+  $\hat{h} \in H$, ktorá minimalizuje trénovaciu chybu. Inak zapísané,
+  $$\hat{h} = \argmin_{h \in H} \left( \E_T \left[ \err_T(h) \right] \right).$$
+  
+  Potom platí
+  $$\E_T \left[ \E_{x,y} \left[ \left( (\hat{h}(x) - h^\star(x)) + (h^\star(x) - y) \right)^2 \right] \right] = \E_T \left[ \E_{x,y} \left[ (\hat{h}(x) - h^\star(x))^2 \right] \right] + \E_T \left[ \E_{x,y} \left[ (h^\star(x) - y)^2 \right] \right]$$
+\end{theorem}
+\begin{remark}
+  Dokazovaná rovnosť je ekvivalentná s nasledovnou, stručnejšou:
+  $$\E_T \left[ \E_{x, y} \left[ (\hat{h}(x) - h^\star(x)) \cdot (h^\star(x) - y) \right] \right] = 0.$$
+  Túto kratšiu verziu získame roznásobením a použitím linearity strednej
+  hodnoty. V dôkaze budeme dokazovať túto rovnosť.
+\end{remark}
+\begin{remark}
+  Všimnite si, že potrebujeme uzavretosť množiny $H$ na limity na to,
+  aby bolo $\argmin_{h \in H} (\ldots)$ dobre definované. Vo všeobecnosti
+  nemusí existovať taká funkcia, ale môže existovať nekonečná postupnosť
+  funkcii, každá ďalšia lepšia, ako tá predchádzajúca. (Inak povedané,
+  neexistuje minimum, iba infimum.)
+\end{remark}
+\begin{remark}
+  Veta by sa dala rozšíriť aj na iné množiny $X, Y$, napríklad keď
+  predpovedaná premenná je vektor ($Y = \reals^m$), ... Možno ani $P$
+  nemusí byť spojité. Pre jednoduchosť argumentu ale budeme uvažovať
+  vetu tak, ako je popísaná vyššie.
+\end{remark}
+\begin{remark}
+  Predpoklady vety sú značne obmedzujúce. Napríklad si uvedomte, že
+  ju nie je možné použiť na klasifikáciu, či dokonca ani na ľubovoľnú
+  ohraničenú regresiu (kde rozumné hodnoty $y$ sú ohraničené). Ale taká
+  je teória.
+\end{remark}
+
+Pri našom dôkaze využijeme niekoľko vlastností funkcii, ktoré uvádzame
+v nasledujúcom odseku. Skúsený čitateľ-matematik ho môže preskočiť.
+
+\begin{definition}
+  (Skalárny súčin.) Nech $f, g$ sú funkcie z $X$ do $\reals$,
+  z nejakej príjemne sa správajúcej množiny funkcii (tj. rovnomerne
+  spojité, ..., čokoľvek, aby nasledujúce argumenty prešli). Definujeme
+  ich skalárny súčin $\langle \cdot, \cdot \rangle$ ako
+  \begin{align}
+    \langle f, g \rangle
+      &= \int f(x) \cdot g(x)\ d\rho x \\
+      &= \E_x \left[ f(x) \cdot g(x) \right],
+  \end{align}
+  kde $\rho$ je hustota pravdepodobnosti distribúcie $P$.
+  Rozmyslite si, že takto definovaný skalárny súčin má všetky vlastnosti,
+  ktoré sa bežne požadujú od skalárnych súčinov:
+  \begin{itemize}
+    \item Je symetrický od svojich argumentov, teda $\langle f, g \rangle = \langle g, f \rangle$.
+    \item Je lineárny: $\langle f, g + h \rangle = \langle f, g \rangle + \langle f, h \rangle$
+      a tiež $\langle k \cdot f, g \rangle = k \cdot \langle f, g \rangle$.
+    \item $\langle f, f \rangle \geq 0$ pre ľubovoľné $f$, pričom rovnosť
+      nastáva práve vtedy, keď je $f$ konštantne nulové.
+  \end{itemize}
+\end{definition}
+
+\begin{definition}
+  (Kolmosť.) Dve funkcie $f, g$ sú na seba kolmé, ak ich skalárny
+  súčin je $0$. Značíme $f \perp g$.
+\end{definition}
+
+\begin{definition}
+  (Norma.) Podľa skalárneho súčinu definujeme normu funkcie (jej ``dĺžku''):
+  $$\norm{f} = \sqrt{\langle f, f \rangle} = \sqrt{\E_x \left[ f^2(x) \right] }$$
+  Spĺňa \emph{trojuholníkovú nerovnosť}: pre ľubovoľné funkcie $f, g$
+  platí
+  $$\norm{f} + \norm{g} \geq \norm{f + g}.$$
+  Definuje nám teda (euklidovskú) metriku nad funkciami, podľa
+  ktorej definujeme limity a konvergenciu.
+\end{definition}
+
+\begin{lemma}
+  (Pytagorova veta.) Nech $f \perp g$. Potom platí:
+  $$\norm{f}^2 + \norm{g}^2 = \norm{f + g}^2$$
+\end{lemma}
+\begin{proof}
+  Pozrime sa na pravú stranu. Iba v nej zapíšeme normu ako skalárny
+  súčin a využijeme jeho linearitu a symetriu:
+  \begin{align}
+    \norm{f + g}^2
+      &= \langle f + g, f + g \rangle \\
+      &= \langle f, f \rangle + \langle g, g \rangle + 2 \cdot \langle f, g \rangle
+  \end{align}
+  Pretože $f \perp g$, posledný sčítanec je nulový, čím dostávame
+  dokazované tvrdenie.
+\end{proof}
+
+\begin{definition}
+  (Projekcia na množinu.) Nech $H$ je množina funkcii, ktorá je uzavretá
+  na lineárne kombinácie a na limity, a nech $f$ je funkcia.
+  \emph{Projekciu} funkcie $f$ na množinu $H$ budeme označovať $f_H$
+  a budeme pod ňou rozumieť nasledovný výraz:
+  $$f_H = \argmin_{h \in H} d(f, h)$$
+\end{definition}
+
+\begin{lemma}
+  (Kolmosť projekcie.) Pre ľubovoľnú funkciu $h \in H$ platí $h \perp f - f_H$.
+\end{lemma}
+\begin{proof}
+  Sporom, predpokladajme, že $h \not\perp f - f_H$. Takže
+  $\langle h, f - f_H \rangle \neq 0$. Ukážeme, že potom existuje
+  v $H$ funkcia, ktorá je k funkcii $f$ bližšie, ako funkcia $f_H$.
+  To bude hľadaný spor s definíciou $f_H$.
+  
+  Pozrime sa na všetky funkcie, ktoré ležia na priamke
+  $f_H + \Delta \cdot h$. Tieto funkci sú v množine $H$, pretože
+  $f_H, h \in H$ a množina $H$ je uzavretá na lineárne kombinácie.
+  Každú z týchto funkcii vieme asociovať s jedným reálnym číslom
+  $\Delta$. Pozrime sa na ich vzdialenosti od funkcie $f$, vyjadrené
+  ako funkcia od $\Delta$:
+  \begin{align}
+    \text{dist}(\Delta)
+      &= d(f, f_H + \Delta \cdot h) \\
+      &= \langle (f - f_H) + \Delta \cdot h, (f - f_H) + \Delta \cdot h \rangle \\
+      &= \langle f - f_H, f - f_H \rangle + 2\Delta \cdot \langle h, f - f_H \rangle + \Delta^2 \cdot \langle h, h \rangle
+  \end{align}
+  Pozrime sa na deriváciu tejto funkcie. Podľa definície $f_H$ by
+  malo byť $f - f_H$ najkratšie možné, teda pre $\Delta = 0$ by mala
+  funkcia $\text{dist}$ nadobúdať minimum, a teda mať tam nulovú
+  deriváciu. Uvidíme, že tomu tak nie je:
+  \begin{align}
+    \frac{\partial \text{dist}}{\partial \Delta} \left( 0 \right)
+      &= \lim_{\Delta \to 0} \left( \frac{\text{dist}(\Delta) - \text{dist}(0)}{\Delta} \right) \\
+      &= \lim_{\Delta \to 0} \left( \frac{2\Delta \cdot \langle h, f - f_H \rangle + \Delta^2 \cdot \langle h, h \rangle}{\Delta} \right) \\
+      &= 2 \cdot \langle h, f - f_H \rangle
+  \end{align}
+  To je nenulové, nakoľko $h \not \perp f - f_H$. Čo je hľadaný spor.
+\end{proof}
+
+\TODO{dokončiť dôkaz}
+
+
+
+\subsection{Bias-variance tradeoff, verzia 2.}
+V literatúre pod názvom \emph{bias-variance tradeoff} vystupuje aj
+podobný, ale predsa odlišný výsledok, ako bolo uvedené vyššie.
+Ukážeme a odvodíme si ho.
+
+\begin{theorem}
+  Nech $y : X \to \reals$ je funkcia, ktorú sa snažíme modelovať.
+  Predpokladajme, že sa dá rozložiť na časti: $y = f(x) + \varepsilon$,
+  kde $\varepsilon$ hrá rolu šumu: je nezávislý od všetkého a
+  $\E[\varepsilon] = 0$. Označíme jeho pravdepodobnostnú distribúciu
+  $E$.
+  
+  Nech výstupom trénovacieho algoritmu je $\hat{f}$. Za chybovú
+  funkciu zvoľme kvadratickú chybu. Chybu algoritmu vieme teda
+  vypočítať nasledovne:
+  $$\chalg = \E_{(x, y) \sim P, T \sim P^t, \varepsilon \sim E} \left[ (\hat{f}(x) - y)^2 \right].$$
+  
+  Tvrdíme, že sa dá rozložiť na tri nasledovné časti:
+  $$
+  \chalg
+      = \underbrace{\Var(\hat{f}(x) - f(x))}_{\text{\normalfont rozptyl}}
+      + \underbrace{(\E[\hat{f}(x)] - \E[f(x)])^2}_{\text{\normalfont výchylka}^2}
+      + \underbrace{\Var(\varepsilon)}_{\text{\normalfont šum}}
+  $$
+\end{theorem}
+\begin{remark}
+  V poslednej rovnici sme kvôli stručnosti vynechali pri stredných
+  hodnotách a rozptyloch premenné a distribúcie, z ktorých ich berieme.
+  V dôkaze budeme vždy brať všetky premenné z ich príslušných distribúcii.
+\end{remark}
+\begin{remark}
+  Funkcia $f$ hrá v podstate tú istú rolu, čo najlepšia možná hypotéza
+  spomedzi všetkých funkcii (nielen tých v množine hypotéz), $h^\square$.
+\end{remark}
+\begin{remark}
+  V tomto znení bias-variance tradeoff-u názvy \emph{rozptyl} a
+  \emph{výchylka} zodpovedajú príslušným štatistickým/pravdepodobnostným
+  pojmom.
+\end{remark}
+\begin{remark}
+  Na rozdiel od predchádzajúcej verzie bias-variance tradeoff-u, tu
+  nebudeme potrebovať žiadne dodatočné predpoklady od algoritmu ani
+  od jeho množiny hypotéz. (Nemusí teda vracať hypotézu, ktorá je
+  spomedzi hypotéz v $H$ najlepšia na daných trénovacích dátach.
+  Takisto od množiny hypotéz nepožadujeme žiadne vlastnosti.)
+\end{remark}
+\begin{proof}
+  Upravujme pôvodný výraz.
+  \begin{align}
+    \chalg
+      &= \E \left[ (\hat{f}(x) - y)^2 \right] \\
+      &= \E \left[ (\hat{f}(x) - f(x) - \varepsilon)^2 \right] \\
+      &= \E \left[ (\hat{f}(x) - f(x))^2 \right] + \E \left[ \varepsilon^2 \right] - 2 \cdot \E \left[ \varepsilon \cdot (\hat{f}(x) - f(x)) \right] \\
+      &= \E \left[ (\hat{f}(x) - f(x))^2 \right] + \E \left[ \varepsilon^2 \right]
+  \end{align}
+  Výraz sme upravili, roznásobili a využili linearitu strednej hodnoty.
+  V poslednom kroku sme použili $\E[ab] = \E[a] \cdot \E[b]$, ktorý
+  platí pre ľubovoľné nezávislé premenné, s $a := \varepsilon$,
+  $b := \hat{f}(x) - f(x)$. Zamerajme sa ďalej na prvý sčítanec.
+  \begin{align}
+    \text{prvý sčítanec}
+      &= \E \left[ (\hat{f}(x) - f(x))^2 \right] \\
+      &= \E[\hat{f}(x)^2] + \E[f(x)^2] - 2 \cdot \E[\hat{f}(x) \cdot f(x)] \\
+      &= (\Var(\hat{f}(x)) + \E[\hat{f}(x)]^2) + (\Var(f(x)) + \E[f(x)]^2) - 2 \cdot \E[\hat{f}(x) \cdot f(x)]
+  \end{align}
+  V poslednom kroku sme využili vzťah $\Var(a) = \E[a^2] - \E[a]^2$.
+  Pokračujme ďalej v úpravách.
+  \begin{align}
+    \begin{split}
+      \text{prvý sčítanec}
+        &= \Var(\hat{f}(x)) + \Var(f(x)) + (\E[\hat{f}(x)] - \E[f(x)])^2 \\
+        &\quad + 2 \cdot \E[\hat{f}(x)] \cdot \E[f(x)] - 2 \cdot \E[\hat{f}(x) \cdot f(x)]
+    \end{split} \\
+    &= \Var(\hat{f}(x)) + \Var(f(x)) + (\E[\hat{f}(x)] - \E[f(x)])^2 - 2 \cdot \Cov(\hat{f}(x), f(x)) \\
+    &= \Var(\hat{f}(x) - f(x)) + (\E[\hat{f}(x)] - \E[f(x)])^2
+  \end{align}
+  Využili sme najprv vzťah $\Cov(a, b) = \E[ab] - \E[a] \cdot \E[b]$,
+  a potom $\Var(a - b) = \Var(a) + \Var(b) - 2 \cdot \Cov(a, b)$.
+  Keď to teda celé dáme do jednej rovnice, dostaneme
+  $$
+  \chalg
+      = \underbrace{\Var(\hat{f}(x) - f(x))}_{\text{\normalfont rozptyl}}
+      + \underbrace{(\E[\hat{f}(x)] - \E[f(x)])^2}_{\text{\normalfont výchylka}^2}
+      + \underbrace{\Var(\varepsilon)}_{\text{\normalfont šum}}
+  $$
+\end{proof}
+
+
+
+
+\section{Ako sa vysporiadať s preučením/podučením?}
+
+\TODO{regularizácia}
+\TODO{holdout testing}
+\TODO{$k$-fold cross validation}
+\TODO{best practices}
