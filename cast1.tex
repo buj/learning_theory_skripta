@@ -127,9 +127,6 @@ $h^{\square}$ bude mať nulovú chybu.
 V tomto odseku si ukážeme zaujímavý výsledok, ktorý nám za určitých
 predpokladov umožňuje vyjadriť chyby pomocou iných, jasnejších veličín:
 tzv. \emph{výchylky} a \emph{rozptylu}.
-
-
-\paragraph{Odvodenie.}
 Označme najlepšiu hypotézu z množiny $H$ ako $h^\star$, teda
 $$h^\star = \argmin_h \left( \err(h) \right).$$
 
@@ -381,7 +378,7 @@ v nasledujúcom odseku. Skúsený čitateľ-matematik ho môže preskočiť.
   jednu z možno viacerých funkcii, ktoré minimalizujú vzdialenosť k $H$.
 \end{remark}
 
-\begin{lemma}
+\begin{lemma} \label{lem:projperp}
   (Kolmosť projekcie.) Pre ľubovoľnú funkciu $h \in H$ platí $h \perp f - f_H$.
 \end{lemma}
 \begin{proof}
@@ -443,7 +440,7 @@ v nasledujúcom odseku. Skúsený čitateľ-matematik ho môže preskočiť.
   To môže nastať jedine vtedy, keď $g = h$.
 \end{proof}
 
-\begin{lemma}
+\begin{lemma} \label{lem:hsq}
   Hypotéza $h^\star$ je projekciou $h^\square$ na $H$, teda $h^\star = h^\square_H$.
 \end{lemma}
 \begin{proof}
@@ -470,16 +467,33 @@ v nasledujúcom odseku. Skúsený čitateľ-matematik ho môže preskočiť.
   \end{align}
   A teda je to tiež konštanta. Dostávame tak
   $$h^\star = \argmin_{h \in H} \E_{x,y} \left[ (h(x) - h^\square(x))^2 \right],$$
-  čo je presne definícia projekcia $h^\square$ na množinu $H$.
+  čo je presne definícia projekcie $h^\square$ na množinu $H$.
 \end{proof}
-
-
 
 Vyzbrojení týmito znalosťami, môžeme sa vrhnúť na dôkaz vety \ref{theorem:proj1}.
+Pripomeňme si ešte pred tým dokazovanú rovnosť:
+$$\E_T \left[ \E_{x, y} \left[ (\hat{h}(x) - h^\star(x)) \cdot (h^\star(x) - y) \right] \right] = 0.$$
 
 \begin{proof}
-  Uvedomme si, že
+  Ľavú stranu dokazovanej rovnosti vieme prepísať do nasledovného,
+  ekvivalentného tvaru:
+  $$ = \E_T \left[ \E_{x, y} \left[ (\hat{h}(x) - h^\star(x)) \cdot ((h^\star(x) - h^\square(x)) + (h^\square(x) - y)) \right] \right] $$
+  Vieme, že $\varepsilon := h^\square(x) - y$ sa správa pre dané $x$
+  ako náhodná premenná, ktorá má strednú hodnotu $0$ a je nezávislá
+  od ostatných premenných vystupujúcich vo výraze. Z výrazu ju teda
+  môžeme vyhodiť, dostaneme tak
+  $$ = \E_T \left[ \E_{x, y} \left[ (\hat{h}(x) - h^\star(x)) \cdot (h^\star(x) - h^\square(x)) \right] \right] $$
+  Stačí nám teda dokázať $\hat{h} - h^\star \perp h^\star - h^\square$.
+  To ale vyplýva z lemmy o kolmosti projekcie (\ref{lem:projperp}).
+  Overíme, že jej podmienky sú splnené: z uzavretosti na lineárne
+  kombinácie platí $\hat{h} - h^\star \in H$, a podľa lemmy \ref{lem:hsq}
+  platí $h^\star = h^\square_H$, odkiaľ
+  $h^\star - h^\square = -(h^\square - h^\square_H)$.
+  Záporné znamienko na kolmosti nič nemení.
 \end{proof}
+
+Podobným spôsobom sa dá dokázať aj korektnosť druhého technického
+kroku. To prenechávame čitateľovi ako cvičenie.
 
 
 
@@ -572,9 +586,193 @@ Ukážeme a odvodíme si ho.
 
 
 
+
 \section{Ako sa vysporiadať s preučením/podučením?}
 
-\TODO{regularizácia}
-\TODO{holdout testing}
-\TODO{$k$-fold cross validation}
-\TODO{best practices}
+V tejto časti sa budeme zaoberať otázkou: ``Ako zvoliť vhodne zložitú
+množinu hypotéz?'' Ako sme videli, príliš jednoduché hypotézy vedú
+k síce malému rozptylu, ale veľkej výchylke, zatiaľ čo príliš zložité
+hypotézy vedú k malej výchylke, ale veľkému rozptylu.
+
+Predstavme si, že máme na výber z viacerých množín hypotéz, čím ďalej
+tým zložitejších:
+$$H_1 \subseteq H_2 \subseteq H_3 \subseteq \ldots$$
+Z ktorej množiny hypotéz chceme vybrať?
+
+Pri trénovaní sa snažíme nájsť hypotézu $h$, ktorá minimalizuje chybu
+na trénovacích dátach $\err_T(h)$. Táto chyba nám ale nehovorí nič o rozptyle.
+Ak by sme si graficky znázornili testovacie a trénovacie chyby najlepších
+hypotéz z jednotlivých množín, vyzeralo by to zhruba ako na obrázku
+\ref{img:regular1}.
+
+\TODO{obrázok}
+
+
+
+\subsection{Regularizácia}
+
+V tomto prístupe do minimalizovaného výrazu umelo pridáme člen, ktorý
+aproximuje rozptyl: $\penal(h)$, pričom z čím zložitejšej množiny
+hypotéza $h$ je, tým väčšia pokuta. Takže výstupom algoritmu je
+$$\hat{h} = \argmin_{h \in H_1 \cup H_2 \cup \ldots} \left( \err_T(h) + \penal(h) \right).$$
+
+Uvedomte si, že vrámci jednej množiny $H_i$ ostáva ako najlepšia
+hypotéza stále tá istá, ako pred zavedením pokuty. V jednej množine
+sú totiž všetky hypotézy penalizované rovnako, nerobí to teda rozdiel.
+Penalizácia nám ale umožňuje ``férovejšie'' porovnávať hypotézy z rôznych
+množín, nakoľko bez pokuty by na tom boli (neprávom) lepšie
+zložitejšie hypotézy.
+
+Množiny $H_i$ nemusia byť explicitné, môžu byť implicitne skryté v tom,
+aký tvar má výraz $\penal(h)$. Do jednej množiny patria tie hypotézy,
+ktoré majú rovnakú penalizáciu.
+
+Uvedieme si niekoľko príkladov výrazov, ktoré môžu byť použité ako
+pokuta. Vo všetkých prípadoch je pokuta je parametrizovaná reálnym
+parametrom $\lambda$ hovoriacim, ako veľké pokuty chceme udeľovať.
+Budeme predpokladať, že celá množina hypotéz, z ktorej vyberáme
+(tj. $H_1 \cup H_2 \cup \ldots$) je množina lineárnych funkcii
+$\reals^n \to \reals$. Hypotézy majú teda tvar
+$$h(x) = a_1x_1 + a_2x_2 + \ldots + a_nx_n.$$
+\begin{itemize}
+  \item $L_2$ regularizácia (známa aj ako \emph{ridge regression}).
+    V nej penalizujeme veľké váhy: čím dôležitejší atribút, tým väčšie
+    váhy si môže dovoliť mať.
+    $$ \penal(h) = \lambda \cdot \norm{(a_1, a_2, \ldots, a_n)}^2 = \lambda \cdot (a_1^2 + a_2^2 + \ldots + a_n^2) $$
+  \item $L_1$ regularizácia (známa aj ako \emph{lasso}). Opäť penalizujeme
+    veľké váhy, avšak pokuta je iná.
+    $$ \penal(h) = \lambda \cdot (|a_1| + |a_2| + \ldots + |a_n|) $$
+    Táto pokuta ``tlačí'' nepotrebné atribúty do nuly, čo je výhodné:
+    nulové atribúty vôbec nemusíme uvažovať, čo nám zníži výpočtové
+    nároky. Na druhej strane sa táto pokuta neoptimalizuje ľahko
+    (z optimalizačného hľadiska).
+\end{itemize}
+
+
+
+\subsection{Holdout testing}
+
+V tomto prístupe si rozdelíme dostupné dáta na dve časti:
+trénovaciu množinu a \emph{validačnú množinu}. Pomocou validačnej
+množiny budeme odhadovať testovacie chyby pre jednotlivé množiny
+hypotéz, na základe ktorých zistíme, ktorá množina hypotéz je
+pre náš problém najvhodnejšia. Konkrétnejšie:
+\begin{enumerate}
+  \item Trénovaciu množinu použijeme na natrénovanie hypotéz
+    z jednotlivých množín.
+  \item \label{holdout:step2} Ako odhad testovacej chyby jednotlivých
+    hypotéz použijeme ich chybu na validačnej množine. Podľa týchto
+    odhadov zistíme, ktorá množina hypotéz je pre náš problém najvhodnejšia.
+  \item Použijeme všetky dáta, ktoré máme k dispozícii (tj. z trénovacej
+    aj validačnej množiny), na natrénovanie najlepšej možnej hypotézy.
+    Berieme samozrejme v úvahu iba hypotézy z najlepšej množiny hypotéz.
+    Výsledná hypotéza je výstupom.
+\end{enumerate}
+ 
+V kroku \ref{holdout:step2} je dôležité, aby bola validačná
+množina nezávislá od trénovacej. Prečo je to dôležité? Môžeme uvažovať
+extrémny prípad, keď je validačná množina totožná s trénovacou. Potom
+ale ako náš ``odhad'' dostaneme trénovaciu chybu, ktorá rozhodne nie
+je dobrým odhadom testovacej chyby. Nezávislosť nám teda zaručuje, že
+odhad získaný na validačnej množine je dobrý.
+
+\begin{remark}
+  Treba podotknúť, že chyba na validačnej množine je iba odhad. Ak
+  by sme mali dostatočne veľa rôznych modelov, z ktorých vyberáme
+  (tj. $H_1, H_2, \ldots$), pre niektorý z nich by sa mohlo stať čistou
+  náhodou, že jeho validačná chyba je nízka, napriek tomu, že jeho
+  skutočná testovacia chyba je vysoká.
+  
+  Toto je podobné, ako pri overovaní vedeckých hypotéz: napríklad si
+  predstavme $10$ hypotéz, každá s $10\%$ šancou, že bude konzistentná
+  s nazbieranými dátami. Potom môžeme očakávať, že jedna z nich bude
+  konzistentná s nazbieranými dátami, napriek tomu, že všetky sú úplne
+  náhodné.
+  
+  V oboch prípadoch sa to dá samozrejme eliminovať jedným spôsobom:
+  viac dát.
+\end{remark}
+
+\paragraph{$k$-fold evaluation.} Pri tomto prístupe je dôležité mať
+dobrý odhad testovacej chyby pre jednotlivé množiny hypotéz. Dát ale
+môže byť málo, a v takom prípade môže byť odhad nestabilný/nepresný.
+Môžeme ale experiment zopakovať niekoľkokrát: v každej iterácii teda
+zvolíme inú trénovaciu a inú validačnú množinu, a dostaneme iný odhad
+testovacej chyby. Keď tieto odhady spriemerujeme, dostaneme oveľa
+presnejší odhad, ako keby sme vykonali iba jednu iteráciu.
+
+V tomto konkrétnom prístupe je $k$ iterácii, a množiny sa volia
+nasledovne: všetky dáta sa rozdelia na $k$ zhruba rovnako veľkých
+a navzájom nezávislých množín $K_1, K_2, \ldots, K_k$. Následne,
+v iterácii $i$ sa ako validačné dáta použije množina $K_i$. Všetko
+ostatné budú trénovacie dáta.
+
+\paragraph{Testovacia množina.} Ak chceme zmerať testovaciu chybu
+výstupnej hypotézy, musíme si na to rezervovať ďalšiu časť dát:
+\emph{testovaciu množinu}. Tú nepoužívame ani pri trénovaní, ani
+pri validácii. Iba úplne na konci celého procesu na nej vypočítame
+chybu našej hypotézy.
+
+\begin{remark}
+  ``Ak sa mi model trénuje príliš dobre, väčšinou to je veľmi zle!''
+\end{remark}
+
+
+
+\section{Cvičenia}
+
+V nasledujúcich dvoch cvičeniach môžete predpokladať, že trénovací
+algoritmus vždy vráti nejakú funkciu (nemusí byť len jedna)
+s minimálnou chybou na trénovacích dátach.
+
+\begin{exercise}
+  Je rozumné predpokladať (a všade vyššie sme tak činili), že s väčším
+  množstvom trénovacích dát sa nám bude testovacia chyba zmenšovať. Sú
+  ale zostrojiteľné situácie, kedy tomu tak nie je. Nájdite jednu takú
+  situáciu.
+  
+  Konkrétne, nájdite takú množinu hypotéz $H$ funkcii $\reals^n \to \reals$
+  a pravdepodobnostné rozdelenie $P$, pre ktoré sa nám bude testovacia
+  chyba so zvyšujúcim sa počtom trénovacích chýb \emph{zvyšovať}. Jediná
+  podmienka je kladená na množinu hypotéz: pre každú možnú trénovaciu
+  množinu $T$ musí existovať hypotéza v $H$, ktorá minimalizuje
+  trénovaciu chybu. (Teda vždy musí existovať minimum, vo všeobecnosti
+  existuje iba infimum.)
+\end{exercise}
+
+\begin{exercise}
+  Za určitých podmienok ale skutočne platí, že viac trénovacích dát
+  nám vo veľkom merítku neuškodí. Nech množina hypotéz $H$ je konečná
+  a všetky jej funkcie ($\reals^n \to \reals$) sú ohraničené. Dokážte,
+  keď $t \to \infty$, tak chyba hypotézy $\hat{h}$ sa bude blížiť k
+  chybe najlepšej možnej hypotézy $h^\star$. Konkrétnejšie, dokážte
+  $$\lim_{t \to \infty} \E_T \left[ \err(\hat{h}) - \err(h^\star) \right] = 0.$$
+\end{exercise}
+
+\begin{exercise}
+  Dokážte korektnosť druhého technického kroku, v odvodení rozkladu
+  výchylky na trénovací rozptyl a priemernú trénovaciu chybu. Konkrétnejšie,
+  dokážte
+  $$ \E_T \left[ \E_{x_i, y_i} \left[ (h^\star(x_i) - \hat{h}(x_i)) \cdot (\hat{h}(x_i) - y_i) \right] \right] = 0. $$
+  Predpoklady kladené na množinu hypotéz sú rovnaké: musí byť uzavretá
+  na lineárne kombinácie a na limity.
+\end{exercise}
+
+\begin{exercise}
+  Jednou výhodou $L_2$ regularizácie oproti $L_1$ regularizácie je, že
+  sa ľahšie minimalizuje výsledný výraz. Ako príklad uvedieme lineárnu
+  regresiu. V nej je hypotéza parametrizovaná stĺpcovým vektorom
+  $\theta = (\theta_1, \ldots, \theta_n)^T$. Výstupom pre vstup
+  $x = (x_1, \ldots, x_n)$ je $x \cdot \theta$. 
+  
+  Označme $X$ maticu, ktorej riadkami sú vstupe jednotlivých trénovacích
+  príkladov. Ďalej nech $y$ je stĺpcový vektor cieľových výstupov na
+  jednotlivých príkladoch. Ako určite vieme, optimálnymi parametrami
+  lineárnej hypotézy je taký stĺpcový vektor $\theta$, ktorý je riešením
+  rovnice
+  $$X^T X \cdot \theta = X^T y.$$
+  Dokáže, že keď k minimalizovanej hodnote pridáme pokutu vo forme
+  $\lambda \cdot \norm{\theta}^2$, tak sa optimálnymi parametrami stane
+  $\theta$ riešiace rovnicu
+  $$(X^T X + \lambda I) \cdot \theta = X^T y.$$
+\end{exercise}

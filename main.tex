@@ -14,13 +14,15 @@
 
 \usepackage{amsthm}
 \theoremstyle{plain}
-\newtheorem{theorem}{Veta}
-\newtheorem{lemma}{Lemma}
+\newtheorem{theorem}{Veta}[chapter]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Tvrdenie}
+\newtheorem{corollary}[theorem]{Dôsledok}
 \theoremstyle{remark}
-\newtheorem{remark}{Poznámka}
-\newtheorem{corollary}{Dôsledok}
+\newtheorem{remark}{Poznámka}[chapter]
 \theoremstyle{definition}
 \newtheorem{definition}{Definícia}
+\newtheorem{exercise}{}[chapter]
 
 \usepackage{xcolor} % \color
 \usepackage{graphicx} % obrazky
@@ -41,6 +43,7 @@
 \newcommand{\vychylka}{\text{\normalfont výchylka}}
 \newcommand{\rozptyl}{\text{\normalfont rozptyl}}
 \newcommand{\chalg}{\text{\normalfont chyba algoritmu}}
+\newcommand{\penal}{\text{\normalfont pokuta}}
 
 
 \newcommand{\TODO}[1]{\noindent {\color{red} TODO #1} \\}
