@@ -31,7 +31,8 @@ nevieme garantovať, že dostaneme dobrú hypotézu: mohli sme si
 
 Začneme definíciou PAC učenia, ktorá ešte nebude brať do úvahy
 výpočtovú stránku učenia.
-Zameriame sa na klasifikačné úlohy, v ktorých je cieľom rozlíšiť medzi
+
+Zameriame sa na binárne klasifikačné úlohy, v ktorých je cieľom rozlíšiť medzi
 reprezentantmi nejakého cieľového konceptu od nereprezentantov. Napríklad
 cieľovým konceptom môže byť ``písmeno A''. Hypotéza dostane na vstupe
 obrázok $32 \times 32$ a má povedať, či tento obrázok vyobrazuje
@@ -65,6 +66,11 @@ určené cez $x$ a $c$.
   stránku algoritmu. Vtedy sa budeme zaoberať aj tým, v akom čase náš
   algoritmus beží a koľko trénovacích príkladov potrebuje. Budeme
   hovoriť o \emph{efektívnej PAC naučiteľnosti}.
+\end{remark}
+\begin{remark}
+  Pripomíname, že chyba hypotézy $h$ sa pre klasifikačné úlohy počíta
+  ako
+  $$\err(h) = \E_{x \sim P} \left[ h(x) \neq c(x) \right] = \prob_{x \sim P}( h(x) \neq c(x) ).$$
 \end{remark}
 
 Budeme hovoriť, že trénovací príklad $(x, y)$ je \emph{pozitívny},
@@ -362,7 +368,7 @@ Vyššie uvedený postupy pre konečné množiny hypotéz zlyhajú, ak
 $|H| = \infty$: nedostaneme z nich žiaden odhad. Aj pre nekonečné
 množiny hypotéz je ale možné odvodiť horné odhady, ktoré sa už nebudú
 odvíjať od veľkosti množiny $H$, ale od nejakej jej miery zložitosti.
-Touto mierou zložitosti bude tzv. \emph{Vapnik-Červonenkisova dimenzia}.
+Touto mierou zložitosti bude tzv. \emph{Vapnik-Chervonenkisova dimenzia}.
 Predtým sa ale pozrieme na jednoduchý príklad.
 
 
@@ -462,9 +468,9 @@ ho s $c$.
 
 
 
-\subsection{Vapnik-Červonenkisova dimenzia}
+\subsection{Vapnik-Chervonenkisova dimenzia}
 
-Vapnik-Červonenkisova dimenzia (alebo skrátene VC dimenzia) je miera
+Vapnik-Chervonenkisova dimenzia (alebo skrátene VC dimenzia) je miera
 zložitosti množiny hypotéz, pomocou ktorej sme schopní tvoriť tvrdenia
 v štýle PAC učenia. Na jej definíciu budeme potrebovať niekoľko pomocných
 pojmov.
@@ -481,7 +487,7 @@ hypotézy v $H$ príliš náročné modelovať príklady v $S$: sú schopné
 ich modelovať akokoľvek.
 
 \begin{definition}
-  Vapnik-Červonenkisova dimenzia množiny hypotéz $H$, označovaná
+  Vapnik-Chervonenkisova dimenzia množiny hypotéz $H$, označovaná
   $VCD(H)$, je veľkosť najväčšej množiny $S \subseteq X$, ktorá
   sa dá rozbiť hypotézami v $H$. Ak sa dá rozbiť ľubovoľne veľká
   množina $S$, definujeme $VCD(H) = \infty$.
@@ -494,6 +500,17 @@ veľkosti $d + 1$ sa nedá rozbiť: teda že existuje také označenie vstupov,
 pre ktoré neexistuje v $H$ konzistentný klasifikátor. Z tohto dôvodu je
 obvykle ťažšie dokázať horný odhad na VC dimenziu, ako dolný odhad.
 
+\begin{lemma}
+  Majme dve množiny hypotéz $H$ a $H'$ nad tou istou množinou vstupov $x$.
+  Ak platí $H \supseteq H'$, tak potom platí $VCD(H) \succeq VCD(H')$ (kde
+  $\succeq$ je relácia $\geq$ prirodzene rozšírená na $\nats \cup \{ \infty \}$).
+\end{lemma}
+\begin{proof}
+  Ak sa množina $S$ dá rozbiť pomocou $H'$, potom, pretože každá hypotéza
+  v $H'$ je aj v $H$, dá sa táto množina rozbiť aj pomocou $H$ (rovnakým
+  spôsobom).
+\end{proof}
+
 Než uvedieme vety hovoriace o PAC naučiteľnosti, uvedieme príklady
 niektorých nekonečných množín hypotéz, a neformálne zdôvodníme ich
 VC dimenzie. Väčšinou budú geometrického charakteru (čo je prirodzené,
@@ -502,29 +519,129 @@ ak máme mať nekonečnú množinu hypotéz).
 \paragraph{Intervaly na reálnych číslach.} Nie je ťažké vidieť, že
 ľubovoľná dvojica bodov sa dá rozbiť. Na druhej strane, ak máme tri
 body, tak ich vieme označiť ako na obrázku \ref{vc:interval}, čo nie
-je konzistentné so žiadnym intervalom.
+je konzistentné so žiadnym intervalom. Takže VC dimenzia je $2$.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=1]{obrazky/interval.pdf}
+  \caption{Žiaden interval nevytvorí takéto označenie bodov.}
+  \label{vc:interval}
+\end{figure}
 
 \paragraph{Polroviny v rovine.} Každá trojica bodov tvoriacich
 nedegenerovaný trojuholník sa dá rozbiť, ako je ilustrované na
 obrázku \ref{vc:halfplane}. Na druhej strane, žiadna štvorica bodov
-sa rozbiť nedá:
-\begin{itemize}
-  \item Ak tvoria konvexný štvoruholník, tak jednu protiľahlú dvojicu
-    označíme kladne a druhú záporne.
-  \item Ak tvoria nekonvexný štvoruholník, jeden z bodov je vo vnútri
-    trojuholníka tvoreného ostatnými tromi: tento bod označíme kladne
-    a ostatné body záporne.
-\end{itemize}
+sa rozbiť nedá: ak tvoria konvexný štvoruholník, tak jednu protiľahlú 
+dvojicu označíme kladne a druhú záporne. Ak tvoria nekonvexný 
+štvoruholník, jeden z bodov je vo vnútri trojuholníka tvoreného 
+ostatnými tromi: tento bod označíme kladne a ostatné body záporne.
+Takže VC dimenzia je $3$.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.3\linewidth}
+    \centering
+    \includegraphics[scale=1]{obrazky/halfplane1.pdf}
+    \caption{}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[b]{0.3\linewidth}
+    \centering
+    \includegraphics[scale=1]{obrazky/halfplane2.pdf}
+    \caption{}
+  \end{subfigure}
+  ~
+  \begin{subfigure}[b]{0.3\linewidth}
+    \centering
+    \includegraphics[scale=1]{obrazky/halfplane3.pdf}
+    \caption{}
+  \end{subfigure}
+  \caption{Polroviny v rovine. V situácii (a) vieme nájsť deliacu priamku, v (b) a (c) nie.}
+  \label{vc:halfplane}
+\end{figure}
 
 \paragraph{Osovorovnobežné obdĺžniky.} Štvorica bodov, ktorá sa dá
-rozbiť, je ilustrovaná na obrázku \ref{vc:rect}. Na druhej strane,
-žiadna pätica bodov sa nedá rozbiť. Rozoberieme dva prípady:
-\begin{itemize}
-  \item Ak je aspoň jeden z bodov vo vnútri bounding boxu (nie na okraji),
-    tak ho označíme záporne a všetky body na okraji kladne.
-  \item Ak sú všetky body na obvode bounding boxu, na jeden strane
-    toho obdĺžnika musia ležať aspoň dva body. Jeden z nich označíme
-    kladne a druhý záporne.
-\end{itemize}
+rozbiť, je ilustrovaná na obrázku \ref{vc:rect}, nie každá štvorica
+bodov sa ale dá rozbiť. Na druhej strane, žiadna pätica bodov sa nedá
+rozbiť. Rozoberieme dva prípady: ak je aspoň jeden z bodov vo vnútri 
+bounding boxu (nie na okraji), tak ho označíme záporne a všetky body na 
+okraji kladne. Ak sú všetky body na obvode bounding boxu, na jednej 
+strane toho obdĺžnika musia ležať aspoň dva body. Jeden z nich označíme 
+kladne a druhý záporne. Takže VC dimenzia je $4$.
 
+\begin{figure}
+  \centering
+  \begin{subfigure}[b]{0.23\linewidth}
+    \centering
+    \includegraphics[scale=1]{obrazky/vc_rect1.pdf}
+    \caption{}
+  \end{subfigure}
+  ~
+  \centering
+  \begin{subfigure}[b]{0.23\linewidth}
+    \centering
+    \includegraphics[scale=1]{obrazky/vc_rect2.pdf}
+    \caption{}
+  \end{subfigure}
+  ~
+  \centering
+  \begin{subfigure}[b]{0.23\linewidth}
+    \centering
+    \includegraphics[scale=1]{obrazky/vc_rect3.pdf}
+    \caption{}
+  \end{subfigure}
+  ~
+  \centering
+  \begin{subfigure}[b]{0.23\linewidth}
+    \centering
+    \includegraphics[scale=1]{obrazky/vc_rect4.pdf}
+    \caption{}
+  \end{subfigure}
+  \caption{Osovorovnobežné obdĺžniky. Štvorica bodov, ktorá sa dá rozbiť.
+    Jednotlivé obrázky zobrazujú všetky netriviálne označenia bodov a
+    príslušné konzistentné klasifikátory.}
+  \label{vc:rect}
+\end{figure}
 
+\medskip
+
+Nakoniec hlavný výsledok, kvôli ktorému je VC dimenzia zaujímavá.
+
+\begin{theorem}[Blumer et. al., 1989 \cite{blumer1989learnability}]
+  Nech $C$ je ľubovoľná množina konceptov. Nech $H$ je množina hypotéz
+  s VC dimenziou rovnou $d$. Nech $L$ je ľubovoľný algoritmus, ktorý
+  pre ľubovoľnú sadu $t$ trénovacích príkladov vráti hypotézu $\hat{h}$
+  konzistentnú s príkladmi. Potom $L$ je PAC trénovací algoritmus pre
+  množinu konceptov $C$ s použitím hypotéz v $H$, pokiaľ je $t$
+  dostatočne veľké:
+  $$ t \geq c_0 \left( \frac{1}{\varepsilon} \ln{\frac{1}{\delta}} + \frac{d}{\varepsilon} \ln{\frac{1}{\varepsilon}} \right) $$
+  pre nejakú konštantu $c_0 > 0$.
+\end{theorem}
+
+\TODO{dôkaz}
+
+\begin{theorem}[Haussler et. al., 1994 \cite{haussler1994predicting}]
+  Ak VC dimenzia je $d$, tak ľubovoľný trénovací algoritmus, ktorý vždy
+  vracia hypotézy konzistentné s trénovacími príkladmi, má chybu nanajvýš
+  $$ \E \left[ \err(\hat{h}) \right] = O\left( \frac{d}{t} \ln{\frac{t}{d}} \right). $$
+\end{theorem}
+
+\TODO{dôkaz}
+
+Čo ale v prípade, že neexistuje konzistentný klasifikátor? Taká situácia
+nastane, keď buď cieľový koncept nie je v množine hypotéz, alebo keď v
+probléme vystupuje šum. Ukazuje sa, že aj v takom prípade sa dá
+odhadnúť chyba hypotézy.
+
+\begin{theorem}[Vapnik \& Chervonenkis, 1971 \cite{chervonenkis1971theory}]
+  Nech $h^\star$ je hypotéza v $H$ s najmenšou (testovacou) chybou a
+  nech $\hat{h}$ je hypotéza v $H$ s najmenšou trénovacou chybou. Ak
+  $VCD(H) = d$, tak pre počet trénovacích príkladov
+  $$ t \geq c_0 \left( \frac{1}{\varepsilon} \ln{\frac{1}{\delta}} + \frac{d}{\varepsilon} \ln{\frac{1}{\varepsilon}} \right), $$
+  kde $c_0$ je nejaká konštanta, platí, že s veľkou pravdepodobnosťou
+  je chyba hypotézy $\hat{h}$ dostatočne malá (berúc v úvahu najmenšiu
+  dosiahnuteľnú chybu):
+  $$ \prob( \err(\hat{h}) > \err(h^\star) + \varepsilon ) \leq \delta. $$
+\end{theorem}
+
+\TODO{dôkaz}

@@ -27,10 +27,12 @@
 \usepackage{xcolor} % \color
 \usepackage{graphicx} % obrazky
 \usepackage{subcaption} % \subfigure
+\usepackage{hyperref} % linky
 
 \newcommand{\err}{\mathrm{err}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 
+\newcommand{\nats}{\mathbb{N}}
 \newcommand{\reals}{\mathbb{R}}
 \newcommand{\complex}{\mathbb{C}}
 
@@ -61,5 +63,8 @@
   
   \input{cast1.tex}
   \input{cast2.tex}
+  
+  \bibliographystyle{plain}
+  \bibliography{literatura} 
   
 \end{document}
