@@ -366,7 +366,7 @@ Dolný odhad zodpovedajúci dôsledku \ref{cor:mconj_de} uvedieme bez dôkazu.
 
 Vyššie uvedený postupy pre konečné množiny hypotéz zlyhajú, ak
 $|H| = \infty$: nedostaneme z nich žiaden odhad. Aj pre nekonečné
-množiny hypotéz je ale možné odvodiť horné odhady, ktoré sa už nebudú
+množiny hypotéz je ale možné odvodiť horné odhady. Tie sa už nebudú
 odvíjať od veľkosti množiny $H$, ale od nejakej jej miery zložitosti.
 Touto mierou zložitosti bude tzv. \emph{Vapnik-Chervonenkisova dimenzia}.
 Predtým sa ale pozrieme na jednoduchý príklad.
@@ -395,7 +395,12 @@ ktorý obsahuje všetky body vo vybraných príkladoch. Na obrázku
 \ref{rectgame:hath} ilustrujeme konštrukciu $\hat{h}$ a porovnávame
 ho s $c$.
 
-\TODO{obrázok}
+\begin{figure}
+  \centering
+  \includegraphics[scale=1]{obrazky/rectgame1.pdf}
+  \caption{Obdĺžniková hra: najmenší obdĺžnik konzistentný s príkladmi.}
+  \label{rectgame:hath}
+\end{figure}
 
 \begin{lemma}
   Každá množina bodov $(x_1, y_1), \ldots, (x_t, y_t)$ má unikátny
@@ -461,6 +466,25 @@ ho s $c$.
   $$ p_\larr, p_\rarr, p_\uarr, p_\darr \leq \frac{\varepsilon}{4}. $$
   Postup bude vo všetkých štyroch prípadoch ten istý, ukážeme si to
   teda len na ľavom pásiku.
+  
+  \begin{figure}
+    \begin{subfigure}[t]{0.49\linewidth}
+      \centering
+      \includegraphics[scale=1]{obrazky/rectgame2.pdf}
+      \caption{Krajné pásiky.}
+      \label{rectgame:strips}
+    \end{subfigure}
+    ~
+    \begin{subfigure}[t]{0.49\linewidth}
+      \centering
+      \includegraphics[scale=1]{obrazky/rectgame3.pdf}
+      \caption{Sivou farbou je vyznačená množina všetkých
+        bodov, pre ktoré má pásik naľavo od nich váhu nanajvýš
+        $\frac{\varepsilon}{4}$.}
+      \label{rectgame:eps_strip}
+    \end{subfigure}
+    \caption{Obdĺžniková hra.}
+  \end{figure}
   
   \TODO{dôkaz (eww, grc)}
 \end{proof}
@@ -556,7 +580,7 @@ Takže VC dimenzia je $3$.
     \includegraphics[scale=1]{obrazky/halfplane3.pdf}
     \caption{}
   \end{subfigure}
-  \caption{Polroviny v rovine. V situácii (a) vieme nájsť deliacu priamku, v (b) a (c) nie.}
+  \caption{Polroviny v rovine: v situácii (a) vieme nájsť deliacu priamku, v (b) a (c) nie.}
   \label{vc:halfplane}
 \end{figure}
 
@@ -597,7 +621,7 @@ kladne a druhý záporne. Takže VC dimenzia je $4$.
     \includegraphics[scale=1]{obrazky/vc_rect4.pdf}
     \caption{}
   \end{subfigure}
-  \caption{Osovorovnobežné obdĺžniky. Štvorica bodov, ktorá sa dá rozbiť.
+  \caption{Osovorovnobežné obdĺžniky: štvorica bodov, ktorá sa dá rozbiť.
     Jednotlivé obrázky zobrazujú všetky netriviálne označenia bodov a
     príslušné konzistentné klasifikátory.}
   \label{vc:rect}

@@ -3,7 +3,7 @@ size(0cm, 3cm);
 transform fontsc = scale(1);
 
 pair[] pts = {(0, 0), (3, 1), (2, 3)};
-int[] labs = {0, 0, 1};
+int[] labs = {1, 1, 0};
 
 path halfplane = (-0.5, -0.5) -- (-0.5, 3) -- (3.5, 2) -- (3.5, -0.5) -- cycle;
 fill(halfplane, lightgray);
