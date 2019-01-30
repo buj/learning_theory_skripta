@@ -20,7 +20,7 @@ draw(x_axis, L="počet príkladov $t$", align=RightSide, arrow=Arrow());
 draw(y_axis, L=rotate(90)*"chyba", align=LeftSide, arrow=Arrow());
 
 draw(bias, dashed, L="výchylka", align=LeftSide);
-draw(err, L="chyba algoritmu", align=LeftSide);
+draw(err, L="testovacia chyba", align=LeftSide);
 draw(training_err, dotted);
 
 Label training_err_label = Label("trénovacia chyba", shift(0, -0.5) * arcpoint(training_err, 4));

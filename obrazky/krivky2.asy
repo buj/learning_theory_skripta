@@ -28,7 +28,7 @@ label(bias_lab);
 draw(variance, dashed, L=Label("rozptyl", position=Relative(0.8)), align=RightSide);
 
 draw(total);
-Label total_lab = Label("chyba algoritmu", (2.65, 2));
+Label total_lab = Label("testovacia chyba", (2.65, 2));
 label(total_lab);
 
 draw(training_err, dotted);
