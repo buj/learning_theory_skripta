@@ -177,11 +177,12 @@ $$
 Druhý zo sčítancov sa dá ešte zjednodušiť. Kedže $h^\star$ ani $y$
 nezávisia od trénovacích dát, môžeme sa zbaviť vonkajšej strednej
 hodnoty. Dostávame tak výslednú rovnosť
-$$
+\begin{equation}
   \chalg
     = \underbrace{\E_T \left[ \E_{x,y} \left[ (\hat{h}(x) - h^\star(x))^2 \right] \right]}_{\text{rozptyl}}
     + \underbrace{\E_{x,y} \left[ (h^\star(x) - y)^2 \right]}_{\text{výchylka}}.
-$$
+\label{biasvarianceodvodenie}
+\end{equation}
 
 Prvý zo sčítancov budeme volať \emph{rozptyl}. Trénovací algoritmus
 s malým rozptylom vracia funkcie, ktoré sú blízko optima v množine $H$.
@@ -298,7 +299,9 @@ trénovacia chyba, v závislosti od veľkosti trénovacej množiny (obrázok
   \label{img:hypo}
 \end{figure}
 
+\input cast1-technicke-detaily
 
+\iffalse
 \paragraph{Technické detaily.} \label{tradeoff:tech}
 Nakoniec sa vyjadríme k spomínanému technickému kroku. Začneme jeho
 znením a potom uvedieme jeho predpoklady.
@@ -538,7 +541,7 @@ $$\E_T \left[ \E_{x, y} \left[ (\hat{h}(x) - h^\star(x)) \cdot (h^\star(x) - y) 
 
 Podobným spôsobom sa dá dokázať aj korektnosť druhého technického
 kroku. To prenechávame čitateľovi ako cvičenie.
-
+\fi
 
 
 \subsection{Bias-variance tradeoff, verzia 2.}

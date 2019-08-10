@@ -1,0 +1,151 @@
+\subsection{Technické detaily}
+\label{tradeoff:tech}
+
+\def\dist{\text{dist}}
+
+V tejto časti dokážeme tvrdenie, ktoré sme použili pri odvodení vzťahu
+(\ref{biasvarianceodvodenie}).
+
+Pripomeňme si, že $h^{\square}(x)$ je cieľová funkcia, ktorá je
+definovaná ako $h^{\square}(x)=E_{y|x}[y]$ a táto cieľová funkcia
+nemusí byť súčasťou triedy hypotéz $H$.
+Funkcia $h^\star(x)$ je taká funkcia z $H$, ktorá má najmenšiu možnú
+očakávanú chybu, t.j. $h^\star = \argmin_{h\in H} \left(
+E_{x,y}[(h(x)-y)^2] \right).$ Túto definíciu vieme vztiahnuť ku funkcii
+$h^\square$ pomocou nasledujúcej lemy.
+
+\begin{lemma}
+  Pre funkciu $h^\star(x)$ platí:
+  $$h^\star=\argmin_{h\in H} \left(E_{x}[(h(x)-h^\square(x))^2] \right).$$
+\label{lemaprojekcia}
+\end{lemma}
+
+\begin{proof}
+Úpravou výrazu z definície $h^*$ získame:
+\begin{eqnarray*}
+  E_{x,y}[(h(x)-y)^2] & = & E_{x,y}[((h(x)-h^{\square}(x))+(h^{\square}(x)-y))^2]\\
+  & = & E_{x,y}[\underbrace{(h(x)-h^{\square}(x))^2}_{\text{nezávisí od $y$}}] + E_{x,y}[(h^{\square}(x)-y)^2]\\ && + 2E_{x,y}[((h(x)-h^{\square}(x)(h^{\square}(x)-y))]\\
+    & = & E_x[(h(x)-h^{\square}(x))^2] + E_{x,y}[(h^{\square}(x)-y)^2]\\&&+ 2E_x[(h(x)-h^{\square}(x))(h^{\square}(x)-E_{y|x}[y])]
+\end{eqnarray*}
+Druhý sčítanec je konštanta vzhľadom na $h$, preto ho pri hľadaní
+minima nemusíme uvažovať. Z definície $h^{\square}(x)=E_{y|x}[y]$, preto tretí
+sčítanec bude nulový. Zostáva nám teda:
+$$h^\star=\argmin_{h\in H} \left(E_{x}[(h(x)-h^\square(x))^2] \right),$$
+čo bolo treba dokázať.
+\end{proof}
+
+\noindent
+Z predchádzajúcej lemy teda vyplýva, že funkcia $h^\star$ je priemetom
+funkcie $h^\square$ do $H$.
+Pre zjednodušenie si v tejto kapitole
+zavedieme označenie $\langle f,g \rangle = \E_x[f(x)g(x)]$.  Takisto
+si zavedieme pojem \emph{vzdialenosti funkcií}
+$\dist^2(f,g)=\E_x[(f(x)-g(x))^2]=\langle f(x)-g(x),f(x)-g(x)
+\rangle$.  Funkcia $h^{\star}(x)$ je tak vlastne definovaná ako
+funkcia z $H$ s najmenšou vzdialenosťou od $h^\square$.
+
+\begin{lemma}
+  \label{lemmanula}
+  Nech množina hypotéz $H$ je uzavretá na lineárne kombinácie. 
+  Potom pre ľubovoľnú funkciu $h\in H$ platí:
+  $$\E_{x}\left[h(x)(h^{\star}(x)-h^{\square}(x))\right] =
+     \langle h, h^{\star}-h^{\square} \rangle = 0.$$
+\end{lemma}
+
+
+\begin{proof}
+  Nech $h$ je ľubovoľná funkcia z $H$. Uvažujme triedu funkcií $F$,
+  ktoré sú tvaru $f_\Delta = h^\star + \Delta h$, kde $\Delta$ je
+  ľubovoľné reálne číslo. Všimnime si, že $F\subseteq H$, lebo $H$ je uzavretá
+  na lineárne kombinácie.
+
+  Vzhľadom ku leme \ref{lemaprojekcia}, ktorá charaktizuje $h^\star$,
+  musí byť zo všetkých funkcií z $F$ najbližšou k $h^\square$ funkcia
+  $f_0=h^\star$, z čoho vyplýva, že derivácia funkcie
+  $D(\Delta)=\dist^2(f_\Delta,h^\square)$ musí byť v bode $\Delta=0$ nulová.
+
+  Upravme funkciu $D(\Delta)$:
+  \begin{eqnarray}
+    D(\Delta) & = & \dist^2(f_\Delta,h^\square)\\
+    & = & \langle h^\star+\Delta h-h^\square,h^\star+\Delta h-h^\square \rangle\\
+    & = & \langle (h^\star-h^\square)+\Delta h,(h^\star-h^\square)+\Delta h \rangle\\
+    & = &  \langle h^\star-h^\square, h^\star-h^\square \rangle +
+    \Delta^2 \langle h, h \rangle +
+    2\Delta \langle h^\star-h^\square, h\rangle
+  \end{eqnarray}
+
+  Vypočítame teraz deriváciu $D(\Delta)$ podľa $\Delta$:
+
+  \begin{eqnarray}
+    D'(\Delta)& = & \frac{d\langle h^\star-h^\square, h^\star-h^\square \rangle}{d\Delta} + \frac{d \Delta^2 \langle h, h \rangle}{d\Delta} +
+    \frac{d(2\Delta \langle h^\star-h^\square, h\rangle)}{d\Delta}\\
+    & = & 2\Delta \langle h, h \rangle + 2\langle h^\star-h^\square, h\rangle
+  \end{eqnarray}
+
+  \noindent
+  Teraz položíme $\Delta=0$, a keďže derivácia musí byť v tomto bode nulová,
+  dostávame rovnicu:
+
+  \begin{equation}
+    0 = d'(0) = 2\langle  h^\star-h^\square,h \rangle,
+  \end{equation}
+  čo bolo treba dokázať.
+\end{proof}
+
+\noindent
+Vráťme sa teraz k rovnici (\ref{biasvarianceodvodenie}). Chceme ukázať, že
+$$\E_T \left[ \E_{x,y} \left[ \left( (\hat{h}_T(x) - h^\star(x)) + (h^\star(x) - y) \right)^2 \right] \right] = \E_T \left[ \E_{x,y} \left[ (\hat{h}_T(x) - h^\star(x))^2 \right] \right] + \E_T \left[ \E_{x,y} \left[ (h^\star(x) - y)^2 \right] \right],$$
+čiže potrebujeme ukázať, že
+$$\E_T \left[ \E_{x, y} \left[ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - y) \right] \right] = 0$$
+Platí:
+\begin{eqnarray*}
+\E_{x, y} \left[ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - y) \right] &=&
+\E_{x,y} \left[ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - h^{\square}(x) + h^{\square}(x) - y) \right]\\
+&=& \E_{x,y} [ \underbrace{(\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - h^{\square}(x))}_{\text{nezávisí od $y$}}]\\
+&&+ \E_{x,y} [ (\hat{h}_T(x) - h^\star(x)) \cdot (h^{\square}(x) - y)]\\
+&=& \E_x [ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - h^{\square}(x)) ]\\
+&&+ \E_x [ (\hat{h}_T(x) - h^\star(x)) \cdot (h^{\square}(x) - \E_{y|x}[y]) ].
+\end{eqnarray*}
+Keďže z definície $h^{\square}(x) = \E_{y|x}[y]$, druhý sčítanec sa vynuluje a
+dostávame:
+\begin{eqnarray*}
+  \E_{x, y} \left[ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - y) \right] &=&
+  \E_x [ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - h^{\square}(x)) ]\\
+  &=& \langle \hat{h}_T-h^\star, h^\star-h^\square\rangle.
+\end{eqnarray*}
+Uvedomme si, že funkcia $h=\hat{h}_T-h^\star$ je lineárnou kombináciou dvoch
+funkcií z $H$, a preto tiež patrí do $H$. Preto môžeme použiť Lemu \ref{lemmanula} a dostávame pre ľubovoľnú trénovaciu množinu~$T$:
+$$
+  \E_{x, y} \left[ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - y) \right]
+  = \langle h, h^\star-h^\square\rangle\\
+  = 0,$$
+  
+a teda aj:
+$$\E_T\E_{x, y} \left[ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - y) \right]=0,$$
+čo sme chceli dokázať.
+
+\begin{remark}
+  Označenie $\langle f,g \rangle$ sa vizuálne nepodobá na skalárny
+  súčin vektorov náhodou. V skutočnosti je toto označenie priamočiarym
+  rozšírením skalárneho súčinu vektorov na funkcie a množstvo
+  vlastností skalárneho súčinu vektorov možno analogicky preniesť aj
+  na takto definované skalárne súčiny funkcií. Analogicky ku kolmosti
+  vektorov možno zadefinovať aj kolmosť funkcií $f\perp g$, ak
+  $\langle f,g \rangle = 0$. Lema \ref{lemmanula} je v takom prípade
+  ekvivalentom tvrdenia o kolmosti v prípade projekcií vektorov do
+  podpriestoru. Napríklad pre priamku $p$ a bod $x$ platí, že ak $y$
+  je najbližší bod priamky $p$ ku $x$, tak vektor $x-y$ je kolmý na $p$.
+  V tomto texte je $H$ analógom priamky $p$, $h^\star$ je analógom bodu $y$ a
+  $h^\square$ je analógom bodu $x$.
+\end{remark}
+
+\begin{remark}
+  Všetky tvrdenia doposiaľ predpokladali, že v množine hypotéz $H$
+  existuje funkcia $h^*$ najbližšia ku $H$. Pri niektorých množinách
+  hypotéz však tento predpoklad nemusí byť splnený. Môže sa nám totiž
+  stať, že vieme zostrojiť nekonečnú postupnosť funkcií, kde každá
+  ďalšia funkcia je bližšie ku $h^\square$, no táto postupnosť funkcií
+  konverguje ku funkcii mimo $H$. Aby sme zaručili, že takýto prípad
+  nenastane, musíme do predpokladov zahrnúť aj požiadavku, že $H$ je
+  uzavreté na limity.
+\end{remark}
