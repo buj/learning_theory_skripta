@@ -31,24 +31,26 @@
 \usepackage{comment} % \comment
 
 \newcommand{\err}{\mathrm{err}}
+\newcommand{\Err}{\mathrm{Err}}
 \newcommand{\norm}[1]{\left\lVert#1\right\rVert}
 
-\newcommand{\nats}{\mathbb{N}}
-\newcommand{\reals}{\mathbb{R}}
-\newcommand{\complex}{\mathbb{C}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\C}{\mathbb{C}}
 
-\DeclareMathOperator*{\argmin}{arg\,min}
-\DeclareMathOperator*{\prob}{\mathrm{P}}
+\DeclareMathOperator*{\argmin}{{arg\,min}}
+\DeclareMathOperator*{\prob}{\mathrm{Pr}}
 \DeclareMathOperator*{\E}{\mathrm{E}}
 \DeclareMathOperator*{\Var}{\mathrm{Var}}
 \DeclareMathOperator*{\Cov}{\mathrm{Cov}}
 
-\newcommand{\vychylka}{\text{\normalfont výchylka}}
-\newcommand{\rozptyl}{\text{\normalfont rozptyl}}
-\newcommand{\rozptylt}{\text{\normalfont trénovací rozptyl}}
+\newcommand{\vychylka}{{\epsilon_\text{approx.}}}
+% \newcommand{\vychylkaT}{{\epsilon^T_\text{approx.}}}
+\newcommand{\rozptyl}{{\epsilon_\text{est.}}}
+\newcommand{\rozptylT}{{\epsilon^T_\text{est.}}}
+
 \newcommand{\chalg}{\text{\normalfont očakávaná testovacia chyba}}
 \newcommand{\chalgt}{\text{\normalfont očakávaná trénovacia chyba}}
-\newcommand{\penal}{\text{\normalfont pokuta}}
 
 \newcommand{\larr}{\leftarrow}
 \newcommand{\rarr}{\rightarrow}

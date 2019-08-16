@@ -447,25 +447,60 @@ ho s $c$.
   $$ \prob(\err(\hat{h}) > \varepsilon) \leq \delta. $$
 \end{theorem}
 \begin{proof}
+  Pod \emph{váhou} množiny budeme rozumieť pravdepodobnosť, že náhodný
+  bod z rozdelenia $P$ padne do tejto množiny.
+  
   Zle klasifikované body sú práve tie, ktoré sú vo vnútri $c$ ale nie sú
   vo vnútri $\hat{h}$. Každý z týchto bodov padne do aspoň jedného
   z okrajových ``pásikov'' (nerátajúc jeden z okrajov), ako je
   zobrazené na obrázku \ref{rectgame:strips}.
-  
-  Pod \emph{váhou} množiny budeme rozumieť pravdepodobnosť, že náhodný
-  bod z rozdelenia $P$ padne do tejto množiny.
   Označme $p_\larr, p_\rarr, p_\uarr, p_\darr$ postupne váhy ľavého,
-  pravého, horného, resp. dolného pásika. Chyba $\hat{h}$ sa dá zhora
-  odhadnúť ako súčet týchto váh:
+  pravého, horného, resp. dolného pásika, chyba $\hat{h}$ sa potom dá
+  zhora odhadnúť ako súčet týchto váh:
   $$ \err(\hat{h}) \leq p_\larr + p_\rarr + p_\uarr + p_\darr. $$
   
   Ak by sme voľbou dostatočne veľkého $t$ vedeli zaručiť
   (s pravdepodobnosťou aspoň $1 - \delta$), že dostaneme takú hypotézu
   $\hat{h}$, pre ktorú je výraz na pravej strane nanajvýš $\varepsilon$,
-  vyhrali by sme. Ukážeme, že vieme zaručiť
+  vyhrali by sme.
+  
+  Ukážeme, že vieme zaručiť (s pravdepodobnosťou aspoň $1 - \frac{\delta}{4}$)
+  každú zo štyroch nerovností:
   $$ p_\larr, p_\rarr, p_\uarr, p_\darr \leq \frac{\varepsilon}{4}. $$
-  Postup bude vo všetkých štyroch prípadoch ten istý, ukážeme si to
-  teda len na ľavom pásiku.
+  Potom pravdepodobnosť, že budú všetky štyri nerovnosti platiť súčasne,
+  bude aspoň $1 - \delta$, čo je presne to, čo chceme. Postup bude vo
+  všetkých štyroch prípadoch ten istý, ukážeme si to teda len na ľavom pásiku.
+  
+  Kedy je váha ľavého pásika malá? Keď aspoň
+  jeden trénovací príklad je dostatočne blízko k ľavému okraju. Keď sa
+  na to pozrieme opačne, váha pásika je veľká, ak žiaden trénovací
+  nie je blízko.
+  Nech $\alpha$ je pravdepodobnosť toho, že trénovací príklad je blízko
+  ľavého okraju. Pravdepodobnosť, že ani jeden z trénovacích príkladov
+  nie je blízko, je potom $(1 - \alpha)^t \leq e^{-\alpha t}$. My chceme
+  zvoliť také $t$, aby pravdepodobnosť tohto zlého prípadu bola nanajvýš
+  $\frac{\delta}{4}$:
+  \begin{align}
+    e^{-\alpha t} &\leq \frac{\delta}{4} \\
+    -\alpha t &\leq \ln{\frac{\delta}{4}} \\
+    t &\geq \frac{1}{\alpha} \cdot \ln{\frac{4}{\delta}}
+  \end{align}
+  
+  Stačí teda zvoliť $t \geq \frac{1}{\alpha} \cdot \ln{\frac{4}{\delta}}$.
+  Pre úplnosť ešte ukážeme dolný odhad na pravdepodobnosť $\alpha$.
+  
+  Čo presne znamená byť ``dostatočne blízko'' k ľavému okraju?
+  Bod $(x, y)$ je blízko, ak váha všetkých bodov naľavo od neho je
+  nanajvýš $\frac{\varepsilon}{4}$. Inak zapísané,
+  $$ \prob_{(x',y') \sim P} (x' < x) \leq \frac{\varepsilon}{4}.$$
+  
+  Vyznačme si teda všetky takéto body. Množina týchto bodov bude tvoriť
+  súvislý úsek od ľavého okraja (ako na obrázku \ref{rectgame:eps_strip}),
+  s tým, že hranica úseku v ňej môže ale nemusí byť. Ukážeme, že váha
+  týchto bodov je aspoň $\frac{\varepsilon}{4}$, čím dostaneme odhad
+  $\alpha \geq \frac{\varepsilon}{4}$. (Nie je ťažké vidieť, že ak je
+  rozdelenie $P$ spojité, tak je táto váha dokonca presne
+  $\frac{\varepsilon}{4}$.)
   
   \begin{figure}
     \begin{subfigure}[t]{0.49\linewidth}
@@ -527,7 +562,7 @@ obvykle ťažšie dokázať horný odhad na VC dimenziu, ako dolný odhad.
 \begin{lemma}
   Majme dve množiny hypotéz $H$ a $H'$ nad tou istou množinou vstupov $x$.
   Ak platí $H \supseteq H'$, tak potom platí $VCD(H) \succeq VCD(H')$ (kde
-  $\succeq$ je relácia $\geq$ prirodzene rozšírená na $\nats \cup \{ \infty \}$).
+  $\succeq$ je relácia $\geq$ prirodzene rozšírená na $\N \cup \{ \infty \}$).
 \end{lemma}
 \begin{proof}
   Ak sa množina $S$ dá rozbiť pomocou $H'$, potom, pretože každá hypotéza
