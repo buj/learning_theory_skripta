@@ -1,0 +1,105 @@
+\newcommand{\vVychylka}{\text{výchylka}}
+\newcommand{\vRozptyl}{\text{rozptyl}}
+\newcommand{\vRozptylT}{\text{trénovací rozptyl}}
+\newcommand{\vOTrChAlg}{\text{očakávaná trénovacia chyba algoritmu}}
+
+
+
+\subsection{Kompromis medzi výchylkou a rozptylom (bias-variance tradeoff)} \label{biasvarianceodvodenie}
+
+V tomto odseku si ukážeme zaujímavý výsledok, ktorý nám za určitých
+predpokladov umožňuje vyjadriť chyby pomocou iných, jasnejších veličín:
+tzv. \emph{výchylky} a \emph{rozptylu}.
+Označme najlepšiu hypotézu z množiny $H$ ako $h^\star$, teda
+$$h^\star = \argmin_{h \in H} \left( \Err(h) \right).$$
+
+Budeme upravovať výraz reprezentujúci OTeChAlg.
+\begin{align}
+  \Err(L)
+    &= \E_T \left[ \Err(\hat{h}_T) \right] \\
+    &= \E_T \left[ \E_{x,y} \left[ (\hat{h}_T(x) - y)^2 \right] \right] \\
+    &= \E_T \left[ \E_{x,y} \left[ \left( (\hat{h}_T(x) - h^\star(x)) + (h^\star(x) - y) \right)^2 \right] \right]
+\end{align}
+Posledná rovnosť vychádza z netriviálneho \hyperref[tradeoff:tech]{technického kroku},
+ktorý si vyžaduje dodatočné predpoklady. Tieto technické detaily však prenecháme
+na koniec kapitoly.
+$$
+  \Err(L)
+    = \E_T \left[ \E_{x,y} \left[ (\hat{h}_T(x) - h^\star(x))^2 \right] \right]
+    + \E_T \left[ \E_{x,y} \left[ (h^\star(x) - y)^2 \right] \right]
+$$
+Druhý zo sčítancov sa dá ešte zjednodušiť. Kedže $h^\star$ ani $y$
+nezávisia od trénovacích dát, môžeme sa zbaviť vonkajšej strednej
+hodnoty. Dostávame tak výslednú rovnosť
+$$
+  \Err(L)
+    = \underbrace{\E_T \left[ \E_{x,y} \left[ (\hat{h}_T(x) - h^\star(x))^2 \right] \right]}_{\vRozptyl}
+    + \underbrace{\E_{x,y} \left[ (h^\star(x) - y)^2 \right]}_{\vVychylka}.
+$$
+
+Prvý zo sčítancov budeme volať \emph{rozptyl}. Trénovací algoritmus
+s malým rozptylom vracia funkcie, ktoré sú blízko optima v množine $H$.
+Tým, že mu zväčšíme množinu trénovacích dát, si veľmi neprilepšíme.
+Naopak, algoritmus s veľkým rozptylom vracia funkcie ďaleko od optima,
+vieme sa teda k optimu priblížiť tým, že zväčšíme množstvo trénovacích
+dát.
+
+\medskip
+
+Druhý zo sčítancov budeme volať \emph{výchylka}. Vyjadruje chybu, ktorá
+je spôsobená tým, že sa náš algoritmus obmedzil na nejakú konkrétnu
+množinu hypotéz $H$. Čím väčšia množina hypotéz, tým menšia výchylka
+(nakoľko $h^\star$ je najlepšia hypotéza v množine $H$, jej zväčšením
+si môžeme iba prilepšiť). Zložitejšia množina hypotéz sa ale ľahšie
+``napasuje'' na ľubovoľné trénovacie dáta. To zvyšuje riziko toho,
+že výsledná hypotéza bude špecifická pre trénovacie dáta a nebude
+schopná generalizácie. Teda čím zložitejšia množina hypotéz, tým
+väčší rozptyl.
+
+Výchylku vieme upraviť ďalej. Hypotéza $h^\star$ ani $y$ nezávisia
+od trénovacej množiny $T$. Z ich pohľadu sú teda testovacie dáta $x, y$
+a trénovacie dáta $x_i, y_i$ nerozlíšiteľné. Takže na meranie chyby
+$h^\star$ môžeme použiť trénovacie dáta, berúc v úvahu ich náhodný
+výber:
+\begin{align}
+  \vVychylka
+    &= \E_T \left[ \E_{x_i, y_i} \left[ (h^\star(x_i) - y_i)^2 \right] \right] \\
+    &= \E_T \left[ \E_{x_i, y_i} \left[ \left( (h^\star(x_i) - \hat{h}_T(x_i)) + (\hat{h}_T(x_i) - y_i) \right)^2 \right] \right]
+\end{align}
+Použitím ďalšieho technického kroku dostaneme:
+\begin{align}
+  \vVychylka &= \underbrace{\E_T \left[ \E_{x_i, y_i} \left[ (h^\star(x_i) - \hat{h}_T(x_i))^2 \right] \right]}_\vRozptylT
+    + \underbrace{\E_T \left[ \E_{x_i, y_i} \left[ (\hat{h}_T(x_i) - y_i)^2 \right] \right]}_\vOTrChAlg
+\end{align}
+
+Prvý zo sčítancov budeme volať \emph{trénovací rozptyl}.
+Uvedomme si, že pre ľubovoľné trénovacie dáta $T$ platí
+$$\Err_T(\hat{h}_T) \leq \Err_T(h^\star),$$
+nakoľko $\hat{h}_T$ je optimálna hypotéza pre danú množinu trénovacích
+dát. Hypotéza $h^\star$ síce je najlepšia pre $H$, trénovacie dáta sú ale len
+malá vzorka z $H$.
+Trénovací rozptyl teda môžeme chápať ako mieru toho, ako veľmi
+reprezentatívnu vzorku trénovacích dát sme dostali. Čím menší je,
+tým viac reprezentatívna je naša vzorka.
+
+\medskip
+
+Druhý zo sčítancov je OTrChAlg. Je to stredná hodnota
+chyby, ktorej sa dopustí výstup z algoritmu $\hat{h}_T$ na tých istých
+dátach, pomocou ktorých sme $\hat{h}_T$ zostrojili.
+
+\medskip
+
+Platí
+$$ \Err_T(L) \leq \vVychylka \leq \Err(L). $$
+Na konkrétnych trénovacích dátach ale nemusí platiť, že trénovacia
+chyba je menšia ako testovacia chyba: mohli sme si (síce s malou
+pravdepodobnosťou, ale predsa) vytiahnuť zlé trénovacie dáta, na
+ktorých sa žiadnej hypotéze z $H$ nedarí.
+
+\medskip
+
+Na základe dosiaľ uvedeného vieme graficky znázorniť, ako sa zhruba správajú
+OTeChAlg, rozptyl, výchylka, trénovací rozptyl a OTrChAlg, v závislosti
+od veľkosti trénovacej množiny (obrázok \ref{img:train}) a od zložitosti
+množiny hypotéz (obrázok \ref{img:hypo}).

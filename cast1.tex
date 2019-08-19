@@ -35,7 +35,7 @@ s ktorým budeme pracovať, a v prípade potreby rozširovať/dolaďovať.
 
 
 
-\section{Model}
+\section{Model} \label{ch1:stat_lr_fw}
 
 Predstavme si, že chceme vedieť na základe nejakých vstupných dát (ktoré
 budeme spravidla označovať $x$) predpovedať výstupné dáta (označované $y$).
@@ -101,14 +101,11 @@ každému možnému pozorovaniu priradí nejakú pravdepodobnosť (resp. hustotu
 pravdepodobnosti v prípade spojitého rozdelenia). Trénovacie
 príklady získame ako $t$ nezávislých vzoriek z rozdelenia $P$.
 
-Postup, ktorým zostrojíme funkciu $h$, vieme formalizovať ako algoritmus,
+Postup, ktorým zostrojíme funkciu $h$, vieme formalizovať ako algoritmus $L$,
 ktorý na vstupe dostane niekoľko trénovacích príkladov
 $(x_1, y_1), \ldots, (x_t, y_t)$, a na výstupe vráti funkciu $h : X \to Y$,
 ktorú budeme volať \emph{hypotéza}. Množinu hypotéz označíme $H$.
 
-V tejto kapitole sa nebudeme zaoberať výpočtovou stránkou strojového
-učenia, takže od detailov ako časová zložitosť, spôsob hľadania
-optimálneho riešenia a pod. abstrahujeme.
 
 
 
@@ -229,6 +226,29 @@ a pod.
 
 
 
+\subsection{Diskusia o výpočtových detailoch} \label{ch1:asses}
+
+V tejto kapitole sa nebudeme zaoberať výpočtovou stránkou strojového
+učenia, takže od detailov ako časová zložitosť, spôsob hľadania
+optimálneho riešenia a pod. abstrahujeme.
+
+Namiesto konkrétneho trénovacieho algoritmu teda budeme predpokladať,
+že máme \emph{všemohúci} algoritmus: taký, ktorý nám vždy vráti tú
+hypotézu z $H$, ktorá je z ERM hľadiska najlepšia (teda má najmenšiu
+chybu na trénovacej množine). Teda
+$$ \hat{h}_T = \argmin_{h \in H} \left( \Err_T(h) \right). $$
+
+Vo všeobecnosti to nie je realistický predpoklad; nie je jednoduché
+navrhnúť efektívny algoritmus, ktorý vždy nájde hypotézu s najmenšou
+chybou. Dokonca pre niektoré dostatočne zložité množiny hypotéz $H$
+taký efektívny algoritmus ani nemusí existovať. Nájsť \emph{nejaký}
+algoritmus ale väčšinou nie je problém, len potom beží v čase $O(t!^{t!})$
+(len pre ilustráciu, nič faktické za týmto výrazom nehľadajte). Ak teda
+chceme holistický pohľad na učenie, nemôžeme len tak zanedbať časovú
+zložitosť a iné výpočtové záležitosti.
+
+
+
 
 \section{Analýza veľkostí chýb}
 
@@ -268,7 +288,7 @@ strednú hodnotu? Nie je ťažké vidieť (napríklad zderivovaním), že
 minimum sa nadobúda pre $c = \E_{y|x=x}[y]$. Takže
 $$h^{\square}(x) = \E_{y|x=x}[y],$$
 a testovacia chyba najlepšej hypotézy-funkcie teda je
-$$\Err(h^{\square}) = \E_{x} \left[ \E_{y|x=x} \left[ (y - \E[y])^2 \right] \right] = \E_{x} \left[ \Var_{y|x=x}(y) \right].$$
+$$\Err(h^{\square}) = \E_{x} \left[ \E_{y|x=x} \left[ \left( y - \E[y] \right)^2 \right] \right] = \E_{x} \left[ \Var_{y|x=x}(y) \right].$$
 
 
 
@@ -278,14 +298,13 @@ V tomto odseku si ukážeme, ako sa dá rozložiť celková OTeChAlg na niekoľk
 komponentov. To nám dá lepší obraz o tom, čo treba spraviť, ak chceme
 znížiť OTeChAlg nášho trénovacieho algoritmu $L$ (a dosiahnuť tak lepšie výsledky).
 
-Budeme predpokladať, že výstupom algoritmu je vždy tá hypotéza z množiny
-$H$, ktorá je z ERM pohľadu najlepšia, teda dosahuje najmenšiu trénovaciu
-chybu.
+Pripomeňme si, že náš algoritmus je všemohúci, vracia teda tú hypotézu z $H$,
+ktorá má najmenšiu chybu na trénovacej množine:
 $$ \hat{h}_T = \argmin_{h \in H} \left( \Err_T(h) \right) $$
 
-Označme $h^\star$ tú hypotézu z množiny $H$, ktorá má najmenšiu testovaciu
-chybu. Teda
-$$ h^\star = \argmin_{h \in H} \left( \Err(h) \right). $$
+Označme $h^\star$ objektívne najlepšiu hypotézu z $H$, teda takú,
+ktorá má najmenšiu testovaciu chybu.
+$$ h^\star = \argmin_{h \in H} \left( \Err(h) \right) $$
 
 Uvedomme si, že tieto dve hypotézy sa líšia iba tým, na akom
 pravdepodobnostnom rozdelení sú optimálne. Hypotéza $\hat{h}_T$
@@ -364,6 +383,11 @@ množiny hypotéz (obrázok \ref{img:hypo}).
 
 
 
+\input{bias_variance_vinko.tex}
+
+
+
+
 \section{Podučenie/preučenie}
 
 Ak máme fixné trénovacie dáta $T$, pri voľbe množiny hypotéz $H$ sa snažíme
@@ -380,7 +404,7 @@ $\langle -1, 1 \rangle$. Ak za množinu hypotéz zvolíme lineárne funkcie,
 vďaka ich jednoduchosti už pri malých trénovacích množinách bude trénovacia
 chyba blízko očakávanej testovacej chyby (nízky rozptyl). Za to ale budú
 všetky chyby vysoké (vysoká výchylka). Ak za množinu hypotéz zvolíme polynómy
-nejakého vysokého stupňa, ľahko nájdeme polynóm prechádzajúci cez trénovacie
+nejakého vysokého stupňa, ľahko nájdeme polynóm presne prechádzajúci cez trénovacie
 dáta (nízka trénovacia chyba), avšak mimo nich bude dávať výsledky úplne mimo
 (vysoká testovacia chyba, a teda vysoký rozptyl).
 
@@ -669,3 +693,8 @@ ktorú sú rozptyl aj výchylka-na-druhú nulové).
       + \underbrace{\E_y \left[ \varepsilon^2 \right]}_{\text{\normalfont šum}}.
   $$
 \end{proof}
+
+
+
+
+\input{cast1-technicke-detaily.tex}

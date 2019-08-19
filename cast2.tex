@@ -3,148 +3,164 @@
 V tejto kapitole sa budeme zaoberať otázkou toho, ako závisí chyba
 algoritmu od veľkosti trénovacej množiny. Konkrétne sa budeme
 zaoberať otázkami ako:
-\begin{itemize}
-  \item ``Pri danej veľkosti trénovacej množiny $t$, akú chybu algoritmu
-    môžeme očakávať?''
+\begin{enumerate}
+  \item ``Akú OTeChAlg môžeme očakávať pri danej veľkosti trénovacej množiny $t$?'' \label{pac:q1}
   \item ``Pri danom $t$, s akou pravdepodobnosťou nám algoritmus vráti
-    hypotézu, ktorej chyba je menšia ako $\varepsilon$?''
-\end{itemize}
+    hypotézu, ktorej OTeCh je menšia rovná $\varepsilon$?'' \label{pac:q2}
+\end{enumerate}
 Na základe odpovedí na tieto dve otázky potom budeme schopní zodpovedať
-nasledovné, príbuzné otázky:
-\begin{itemize}
+nasledovné (dalo by sa povedať, že ``inverzné'') otázky:
+\begin{enumerate}
+  \setcounter{enumi}{2}
   \item ``Akú veľkú trénovaciu množinu máme zvoliť, aby sme dosiahli
-    dostatočne malú ($\leq \epsilon$) chybu algoritmu?''
-  \item ``Aké $t$ máme zvoliť, aby sme s vysokou pravdepodobnosťou
-    ($\geq \delta$) dostali dostatočne dobrú ($\leq \varepsilon$)
-    hypotézu?''
-\end{itemize}
+    dostatočne malú ($\leq \varepsilon$) OTeChAlg?'' \label{pac:q3}
+  \item ``Aké $t$ máme zvoliť, aby sme iba s malou pravdepodobnosťou
+    ($\leq \delta$) dostali zlú hypotézu (s OTeCh väčšou ako $\varepsilon$)?'' \label{pac:q4}
+\end{enumerate}
 
 Odtiaľ sa odvíja názov \emph{PAC učenie} (z anglického
-\emph{probably approximately correct learning}).
+\emph{probably approximately correct learning}). Presnejšie, PAC učenie
+sa zaoberá hlavne otázkami \ref{pac:q2} a \ref{pac:q4}; my sa ale budeme
+zaoberať všeobecne tým, ako závisia rôzne metriky (OTeChAlg, ...) od
+počtu trénovacích príkladov $t$.
 
-Obe typy ``chýb'' sú potrebné, keď sa chceme rozprávať o tom,
-aký vplyv má veľkosť trénovacej množiny na trénovací algoritmus.
-Po prvé, $\varepsilon$ je potrebné ako miera toho, čo je dostatočne
-dobrá hypotéza. Po druhé, $\delta$ je potrebné, nakoľko vo všeobecnosti
-nevieme garantovať, že dostaneme dobrú hypotézu: mohli sme si
-(s malou pravdepodobnosťou) vytiahnuť zlé trénovacie dáta.
+Uvedomme si rozdiel medzi otázkami (\ref{pac:q1}, \ref{pac:q3}) a otázkami
+(\ref{pac:q2}, \ref{pac:q4}). V prvom zmienenom sa pýtame na očakávaný
+prípad; ak ale chceme dosiahnuť dobrú hypotézu nie v očakávanom prípade,
+ale zaručene, vieme to zaručiť iba s určitou pravdepodobnosťou. Vždy sa
+totiž môže stať (s malou pravdepodobnosťou), že si vytiahneme
+nereprezentatívne trénovacie dáta. Je teda nutné hovoriť aj o
+veľkosti tejto záruky, takže hranica $\delta$ je potrebná.
 
-Začneme definíciou PAC učenia, ktorá ešte nebude brať do úvahy
-výpočtovú stránku učenia.
 
-Zameriame sa na binárne klasifikačné úlohy, v ktorých je cieľom rozlíšiť medzi
-reprezentantmi nejakého cieľového konceptu od nereprezentantov. Napríklad
-cieľovým konceptom môže byť ``písmeno A''. Hypotéza dostane na vstupe
-obrázok $32 \times 32$ a má povedať, či tento obrázok vyobrazuje
-písmeno A alebo nie.
 
-Máme teda množinu konceptov $C$, z ktorej pochádza cieľový koncept $c$.
-Náš trénovací algoritmus ale nevie, ktorý z nich to je. Jeho úlohou je
-nájsť dobrú aproximáciu, ktorú bude hľadať v množine hypotéz $H$. Budeme
-predpokladať, že $H \supseteq C$, aby bolo zaručená existencia dobrej
-hypotézy.
 
-Algoritmus na vstupe dostane niekoľko trénovacích príkladov v tvare dvojíc
-$(x, c(x))$, pričom $x$ pochádza z pravdepodobnostného rozdelenia $P$.
-Uvažovať $y$ v rozdelení $P$ nie je potrebné, nakoľko je jednoznačne
-určené cez $x$ a $c$.
+\section{Definície, označenia a predpoklady}
+
+Hypotézu $h$ nazveme \emph{zlou}, ak jej OTeCh je väčšia ako $\varepsilon$.
+Inak ju nazveme \emph{dobrou}. Tieto pojmy budeme používať tak, aby bola
+hranica $\varepsilon$ vždy jasná z kontextu.
+
+Budeme riešiť hlavne binárne klasifikačné úlohy, v ktorých je cieľom pre
+každý vstup $x$ povedať, či spĺňa určitú podmienku ($y = 1$) alebo nespĺňa
+($y = 0$). Napríklad môžme chcieť rozlíšiť obrázky $32 \times 32$ ktoré
+obsahujú aspoň jednu mačku od tých, ktoré mačky neobsahujú. Príklady,
+kde $y = 1$ nazveme \emph{pozitívnymi}; ostatné príklady nazveme
+\emph{negatívnymi}. Hypotézy v klasifikačných úlohách budeme nazývať
+\emph{klasifikátormi}.
+
+Pripomíname, že chyba klasifikátora $h$ sa počíta ako
+$$ \Err(h) = \E_{x, y} \left[ h(x) \neq y \right] = \prob_{x, y} \left( h(x) \neq y \right). $$
+
+Budeme pracovať so štandardným modelom učenia (\ref{ch1:stat_lr_fw})
+spolu s predpokladom všemohúceho trénovacieho algoritmu (vždy vráti
+hypotézu s najmenšou chybou na trénovacej množine). Okrem toho budeme
+predpokladať, že množina hypotéz $H$ je \emph{úplná}: existuje v nej
+``úplne správny klasifikátor'', ktorý na každom vstupe dáva
+správny výsledok, má teda nulovú testovaciu chybu. Tento klasifikátor
+je zrejme najlepšou možnou hypotézou v $H$, mohli by sme ho preto značiť
+štandardne $h^\star$. My ho ale budeme značiť $c$ ako ``cieľová hypotéza''.
+Treba si ale dať pozor, že správnych hypotéz v $H$ môže byť viac, a to
+v prípade, keď niektorým vstupy majú v rozdelení $P$ pravdepodobnosť $0$.
+(V takom prípade je $c$ ľubovoľná jedna z týchto hypotéz.)
+
+Uvedomme si, že nech si vytiahneme ľubovoľnú trénovaciu množinu $T$,
+vďaka úplnosti množiny $H$ v nej vždy vieme nájsť klasifikátor s nulovou
+chybou na trénovacej množine. (Napríklad $h^\star$, môžu tam ale byť
+aj ďalšie klasifikátory, s odlišnými výstupmi na vstupoch mimo $T$.) Preto
+trénovací algoritmus vždy nájde hypotézu s nulovou trénovacou chybou.
+Takýto klasifikátor budeme volať \emph{konzistentný klasifikátor};
+názov pochádza od toho, že jeho výstupy sú konzistentné s trénovacími
+príkladmi.
+
+Za týchto predpokladov si budeme klásť nasledovnú otázku: ktoré
+množiny hypotéz $H$ sa dajú naučiť? Pod ``naučením'' sa rozumie to,
+že čím viac trénovacích príkladov algoritmu poskytneme, tým lepšiu
+hypotézu $\hat{h}_T$ môžeme očakávať; v limite $t \to \infty$ si
+môžeme byť takmer určite istí, že dostaneme veľmi dobrú hypotézu.
+Toto sformalizujeme do nasledovnej definície:
 
 \begin{definition}
-  Nech $C$ je množina konceptov nad množinou vstupov $X$. Hovoríme, že
-  $C$ je \emph{PAC naučiteľná} ak existuje algoritmus $L$ s nasledujúcou
-  vlastnosťou: pre každý (cieľový) koncept $c \in C$, pre každé
-  $\varepsilon > 0$, $\delta > 0$ a pre každé možné pravdepodobnostné
-  rozdelenie $P$, ak algoritmu $L$ dáme na vstupe $t$ trénovacích
-  príkladov $(x_i, c(x_i))$ náhodne vybraných podľa $P$ a $t$ je
-  dostatočne veľké, tak nám algoritmus s pravdepodobnosťou nanajvýš
-  $\delta$ vráti hypotézu $\hat{h} \in C$ spĺňajúcu $\err(\hat{h}) \leq \varepsilon$.
-  Táto pravdepodobnosť sa berie cez náhodnosť v ťahaní trénovacích
-  príkladov a prípadnú náhodnosť algoritmu $L$.
+  Množina hypotéz je \emph{PAC$\star$ naučiteľná}, ak pre ľubovoľné pravdepodobnostné
+  rozdelenie $P$ nad $X \times Y$, ľubovoľne malé hranice $\varepsilon > 0$ a $\delta > 0$
+  existuje hranica $t_0$ na počet trénovacích príkladov taká, že pre všetky
+  počty príkladov $t \geq t_0$ platí: zlú hypotézu (s chybou
+  aspoň $\varepsilon$) dostaneme iba s malou pravdepodobnosťou
+  (nanajvýš $\delta$).
+  $$ \forall P: \forall \varepsilon > 0, \delta > 0: \exists t_0: \forall t \geq t_0: \prob_{T \sim P^t} \left( \Err(\hat{h}_T) \geq \varepsilon \right) \leq \delta $$
 \end{definition}
-\begin{remark}
-  Neskôr túto definíciu rozšírime tak, aby brala do úvahy aj výpočtovú
-  stránku algoritmu. Vtedy sa budeme zaoberať aj tým, v akom čase náš
-  algoritmus beží a koľko trénovacích príkladov potrebuje. Budeme
-  hovoriť o \emph{efektívnej PAC naučiteľnosti}.
-\end{remark}
-\begin{remark}
-  Pripomíname, že chyba hypotézy $h$ sa pre klasifikačné úlohy počíta
-  ako
-  $$\err(h) = \E_{x \sim P} \left[ h(x) \neq c(x) \right] = \prob_{x \sim P}( h(x) \neq c(x) ).$$
-\end{remark}
 
-Budeme hovoriť, že trénovací príklad $(x, y)$ je \emph{pozitívny},
-ak $y = 1$. V opačnom prípade budeme hovoriť, že príklad je
-\emph{negatívny}.
+Používame názov PAC$\star$ naučiteľná preto, lebo skutočná (v literatúre
+zaužívaná) definícia PAC naučiteľnosti je o čosi komplikovanejšia: berie
+väčší ohľad na výpočtové detaily, ktorým sa my chceme zatiaľ vyhnúť.
+
 
 
 
 
 \section{Konečné množiny hypotéz}
 
-V tejto časti sa zameriame na konečné množiny hypotéz.
-
-Budeme predpokladať, že algoritmus vždy vráti \emph{konzistentný
-klasifikátor}: takú hypotézu, ktorá je konzistentná s trénovacími
-príkladmi, teda že pre ľubovoľnú trénovaciu množinu $T$ platí
-$\err_T(\hat{h}) = 0$. Za predpokladu $H \supseteq C$ je to
-splniteľný predpoklad: jedným konzistentným klasifikátorom je
-samotný cieľový koncept $c$.
+V tejto časti sa zameriame na konečné množiny hypotéz. Uvedieme
+niekoľko príkladov takých množín: logické formuly obmedzenej
+veľkosti, konečné automaty obmedzenej veľkosti, ... V princípe
+všetko, v čom nevystupujú reálne čísla; s tým že uvažujeme iba
+malé hypotézy.
 
 
 
-\subsection{Základné výsledky}
+\subsection{Konečné množiny sú PAC$\star$ naučiteľné}
 
 \begin{theorem} \label{thm:badhypobound}
-  Nech je dané $\varepsilon > 0$. Hypotézu nazveme \emph{zlú}, ak jej
-  chybovosť je väčšia ako $\varepsilon$. Potom vieme pomocou počtu
-  trénovacích príkladov $t$ odhadnúť pravdepodobnosť, že nám algoritmus
-  vráti zlú hypotézu, nasledovne:
-  $$\prob(\err(\hat{h}) > \varepsilon) < |H| \cdot e^{-\varepsilon t}$$
+  Pomocou počtu trénovacích príkladov $t$ vieme zhora odhadnúť
+  pravdepodobnosť, že nám algoritmus vráti zlú hypotézu, nasledovne:
+  $$ \prob_T(\Err(\hat{h}_T) \geq \varepsilon) \leq |H| \cdot e^{-\varepsilon t} $$
 \end{theorem}
 \begin{proof}
-  Ak žiadna zlá hypotéza nie je konzistentná s príkladmi, tak výstupom
-  algoritmu nemôže byť zlá hypotéza. Budeme sa teda snažiť zhora odhadnúť
-  pravdepodobnosť, že aspoň jedna zlá hypotéza ``prežila''.
+  Predstavme si, že na začiatku vidíme $0$ trénovacích príkladov,
+  a postupne sa nám odkrývajú. Sledujme jednotlivé hypotézy: vždy,
+  keď sa odkryje nejaký príklad, môže sa stať, že je nekonzistentný
+  s hypotézou. Každú takúto hypotézu zo súťaže vylúčime. Po odkrytí
+  všetkých $t$ trénovacích príkladov zostávajú už len tie hypotézy,
+  ktoré sú s príkladmi konzistentné a môžu byť výsledkom algoritmu.
+  Ak ani jedna z týchto hypotéz nie je zlá, výsledkom bude dobrá
+  hypotéza. Aká je pravdepodobnosť, že aspoň jedna z týchto preživších
+  hypotéz je zlá?
   
   Nech $h$ je ľubovoľná zlá hypotéza. Pravdepodobnosť, že je konzistentná
-  s trénovacími príkladmi, je rovná $(1 - \err(h))^t$, čo vieme odhadnúť
-  nasledovne:
-  $$(1 - \err(h))^t < (1 - \varepsilon)^t \leq e^{-\varepsilon t}$$
+  so všetkými $t$ trénovacími príkladmi, je rovná $(1 - \Err(h))^t$,
+  čo vieme odhadnúť nasledovne:
+  $$(1 - \Err(h))^t \leq (1 - \varepsilon)^t \leq e^{-\varepsilon t}$$
   
   Zlých hypotéz je nanajvýš toľko, koľko je všetkých hypotéz, teda
-  $|H|$. Pravdepodobnosť, že aspoň jedna z nich bude konzistentná s
-  príkladmi, sa dá odhadnúť zhora ako súčet ich pravdepodobností:
-  $$\prob(\text{aspoň jedna zlá}) < |H| \cdot e^{-\varepsilon t}$$
+  $|H|$. Pravdepodobnosť, že aspoň jedna z nich bude konzistentná
+  s príkladmi, je nanajvýš súčet pravdepodobností jednotlivých zlých
+  hypotéz:
+  $$\prob_T(\text{prežije aspoň jedna zlá hypotéza}) \leq |H| \cdot e^{-\varepsilon t}$$
   Odkiaľ dostávame požadovanú nerovnosť.
 \end{proof}
-\begin{remark}
-  Vo vyššie uvedenom dôkaze sme nepredpokladali nič o pravdepodobnostnom
-  rozdelení $P$ ani o cieľovom koncepte $c$. Uvedená veta teda platí
-  pre ľubovoľné $P$ a $c$.
-\end{remark}
 
 Čo ak nás zaujíma druhá otázka: ``Ako závisí chyba algoritmu od počtu
 trénovacích príkladov?'' Pri klasifikačných úlohách je táto otázka úzko
-spätá s predošlou otázkou, kde sme sa zaujímali o $\varepsilon$ a $\delta$.
+spätá s predošlou otázkou, kde sme sa zaujímali o hranice $\varepsilon$
+a $\delta$.
 
 \begin{theorem}
   Platí
-  $$ \chalg \leq \frac{1}{t} \cdot \left( \ln{|H|} + \ln{t} + 1 \right). $$
+  $$ \Err(L) \leq \frac{1}{t} \cdot \left( \ln{|H|} + \ln{t} + 1 \right). $$
 \end{theorem}
 \begin{proof}
-  Ak nám algoritmus vráti dobrú hypotézu (s chybou nanajvýš $\varepsilon$),
-  vieme jej chybu odhadnúť zhora ako $\varepsilon$. Ak nám algoritmus vráti
-  zlú hypotézu, jej chyba je nanajvýš $1$. Z toho dostávame nasledovný
-  horný odhad na celkovú chybu algoritmu:
-  $$ \chalg = \E \left[ \err(\hat{h}) \right] \leq \prob(\err(\hat{h}) \leq \varepsilon) \cdot \varepsilon + \prob(\err(\hat{h}) > \varepsilon) \cdot 1$$
-  Pritom pravdepodobnosti na pravej strane vieme odhadnúť zhora:
-  $\prob(\err(\hat{h}) \leq \varepsilon) \leq 1$, a druhú vieme
-  odhadnúť pomocou vety \ref{thm:badhypobound}. Dostávame tak odhad
-  $$ \chalg \leq 1 \cdot \varepsilon + |H| \cdot e^{-\varepsilon t}. $$
+  Ak nám algoritmus vráti dobrú hypotézu, vieme jej OTeCh odhadnúť zhora
+  ako $\varepsilon$. Ak nám algoritmus vráti zlú hypotézu, jej OTeCh je
+  nanajvýš $1$. Z toho dostávame nasledovný horný odhad na OTeChAlg:
+  $$ \Err(L) = \E_T \left[ \Err(\hat{h}_T) \right] \leq \prob_T \left( \Err(\hat{h}_T) < \varepsilon \right) \cdot \varepsilon + \prob_T \left( \Err(\hat{h}_T) \geq \varepsilon \right) \cdot 1 $$
+  Pritom sčítance na pravej strane vieme odhadnúť zhora:
+  $$ \prob_T \left( \Err(\hat{h}_T) < \varepsilon \right) \leq 1 $$
+  a druhý sčítanec vieme odhadnúť pomocou predchádzajúcej vety (\ref{thm:badhypobound}).
+  Dostávame tak odhad
+  $$ \Err(L) \leq 1 \cdot \varepsilon + |H| \cdot e^{-\varepsilon t}. $$
   My sme si ale mohli zvoliť $\varepsilon$ ľubovoľne. Ak teda chceme
-  dostať čo najlepší odhad, nájdeme $\varepsilon$, pre ktoré je výraz
-  na pravej strane čo najmenší. Zderivujme a položme rovné nule:
+  dostať čo najlepší odhad, nájdeme také $\varepsilon$, pre ktoré je výraz
+  na pravej strane čo najmenší: zderivujeme a položíme rovné nule:
   \begin{align}
     1 - |H| \cdot t \cdot e^{-\varepsilon t} &= 0 \\
     \varepsilon &= \frac{1}{t} \cdot \left( \ln{|H|} + \ln{t} \right)
@@ -153,24 +169,21 @@ spätá s predošlou otázkou, kde sme sa zaujímali o $\varepsilon$ a $\delta$.
 \end{proof}
 
 Na základe týchto dvoch viet vieme sformulovať postačujúce podmienky
-na $t$ také, aby boli príslušné chyby ($\varepsilon, \delta$ a chyba
-algoritmu) dostatočne malé. Sformulujeme a dokážeme jednu z nich.
+na $t$ také, aby boli hranice $\varepsilon$ a $\delta$ dostatočne malé.
 
 \begin{corollary}
-  Množina hypotéz $H$ je PAC-naučiteľná: pre každé $\varepsilon > 0$,
-  $\delta > 0$, ľubovoľné pravdepodobnostné rozdelenie $P$ a ľubovoľný
-  cieľový koncept $f \in H$ existuje počet trénovacích príkladov $t$
-  taký, že platí
-  $$\prob(\err(\hat{h}) \leq \varepsilon) \geq 1 - \delta.$$
-  Ekvivalentne,
-  $$\prob(\err(\hat{h}) > \varepsilon) \leq \delta.$$
+  Ľubovoľná konečná množina hypotéz $H$ je PAC$\star$ naučiteľná: pre
+  ľubovoľné rozdelenie $P$, ľubovoľne malé hranice $\varepsilon > 0$
+  a $\delta > 0$, pre počet trénovacích príkladov $t$ spĺňajúci
+  $$ t \geq \frac{1}{\varepsilon} \cdot \left( \ln{|H|} + \ln{\frac{1}{\delta}} \right) $$
+  platí, že dostaneme zlú hypotézu iba s malou pravdepodobnosťou.
 \end{corollary}
 \begin{proof}
   Podľa vety \ref{thm:badhypobound} platí
-  $$\prob(\err(\hat{h}) > \varepsilon) < |H| \cdot e^{-\varepsilon t}.$$
-  Stačí nám teda zvoliť také $t$, aby bol výraz na pravej strane menší
-  rovný $\delta$. Odtiaľ dostaneme postačujúci počet trénovacích
-  príkladov $t$:
+  $$ \prob_T \left( \Err(\hat{h}_T) > \varepsilon \right) < |H| \cdot e^{-\varepsilon t}.$$
+  Stačí nám teda zvoliť také $t$, aby bol výraz na pravej strane nanajvýš
+  $\delta$. Odtiaľ dostaneme postačujúci počet trénovacích
+  príkladov $t$.
   \begin{align}
     |H| \cdot e^{-\varepsilon t} &\leq \delta \\
     \ln{|H|} - \varepsilon t &\leq \ln{\delta} \\
@@ -183,169 +196,205 @@ algoritmu) dostatočne malé. Sformulujeme a dokážeme jednu z nich.
 
 \subsection{Problém konjunkcie}
 
-Jedným príkladom problému, kde je množina hypotéz konečná, je
-\emph{problém konjunkcie pozitívnych literálov}. Na ňom si ukážeme,
-že (aspoň v niektorých problémoch) sú vyššie uvedené odhady relatívne
-tesné.
+Máme $n$ boolovských premenných. Množinou inštancii $X$ sú všetky
+možné ohodnotenia týchto premenných, napríklad pre $n = 3$ je jedným
+možným priradením $x_1 = 0$, $x_2 = 1$, $x_3 = 0$. Každé priradenie
+si vieme predstaviť ako postupnosť bitov dĺžky $n$. Je zrejmé, že
+rôznych priradení je $2^n$.
 
-Nech je dané $n$. Množina vstupov sú všetky možné ohodnotenia boolovských
-premenných $x_1, \ldots, x_n$. Napríklad $x_1 = 0$, $x_2 = 1$, $x_3 = 0$
-je priradenie hodnôt. Priradenia vieme zapísať vo vektorovom tvare:
-vyššie uvedený príklad by sme zapísali ako $x = (0, 1, 0)$. Všetkých
-vstupov je zrejme $2^n$.
+Množinou hypotéz su všetky formuly tvaru $x_{i_1} \land x_{i_2} \land \ldots \land x_{i_k}$.
+Sú to teda konjunkcie premenných, s tým že premenné vo formule nesmú
+vystupovať negované. Tieto formuly sú chápané ako funkcie, ktoré
+vracajú $1$ vtedy, keď dané ohodnotenie premenných spĺňa túto formulu.
+Napríklad $x_1 \land x_3 \land x_4$ vráti $1$ na všetkých vstupoch,
+kde $x_1 = 1$, $x_3 = 1$ a $x_4 = 1$ (ostatné premenné môžu mať
+ľubovoľnú hodnotu). Rôznych hypotéz je zrejme tiež $2^n$.
 
-Množina konceptov $C$ sú všetky konjunkcie nad pozitívnymi literálmi
-$x_1, \ldots, x_n$. Tieto konjunkcie sú chápané ako funkcie, ktoré
-vracajú $1$ iba ak dané ohodnotenie premenných spĺňa túto konjunkciu.
-Napríklad $x_1 \land x_3 \land x_4$ vráti $1$ na všetkých tých vstupoch,
-kde táto konjunkcia platí: musí platiť $x_1 = 1$, $x_3 = 1$, $x_4 = 1$,
-ale ostatné premenné už môžu mať ľubovoľnú hodnotu. Všetkých konceptov
-je zrejme tiež $2^n$. Množina hypotéz $H$ bude rovnaká, ako množina
-konceptov.
+\paragraph{Metafora.} Vyššie uvedený popis je možno príliš formálny, 
+problém sa dá vysvetliť aj prirodzenejším spôsobom. Predstavme
+si, že náš kamarát má batoh, do ktorého dal niektoré z $n$ vecí.
+My chceme zistiť, ktoré z týchto vecí v batohu sú a ktoré v ňom
+nie sú. Množina inštancii sú teda jednotlivé veci, a hypotézy sú
+všetky možné obsahy batoha. Čo ale zodpovedá trénovacím príkladom?
+Predstavme si, že sa môžeme spýtať niekoľko otázok tvaru: ``Obsahuje
+batoh iba týchto $k$ vecí?'' (t.j. nič iné nesmie obsahovať) a kamarát
+nám na každú otázku odpovie áno/nie. Potom trénovacie príklady
+zodpovedajú práve takýmto otázkam, spolu s odpoveďami na ne.
 
-Aby sme videli, že konzistentnosť s trénovacími príkladmi je realistická
-požiadavka, ukážeme si, ako sa dá na základe trénovacích príkladov
-zostrojiť nejaký konzistentný klasifikátor.
+Zavedieme prirodzenú notáciu pre túto metaforu: namiesto $h(x) = 1$
+budeme písať $h \subseteq x$, a namiesto $h(x) = 0$ píšeme $h \not\subseteq x$.
+
+\paragraph{Všemohúci trénovací algoritmus.} Uvidíme, že konzistentnosť
+s trénovacími príkladmi je realistická požiadavka: ukážeme, ako sa
+dá na základe trénovacích príkladov zostrojiť nejaký konzistentný
+klasifikátor.
+
 \begin{theorem}
-  Nech hypotéza $\hat{h}$ je konjunkciou všetkých tých premenných, ktoré
-  sa vyskytujú vo všetkých pozitívnych trénovacích príkladoch. Potom
-  $\hat{h}$ je konzistentná so všetkými trénovacími príkladmi.
+  Nech hypotéza $\hat{h}_T$ obsahuje všetky tie veci, ktoré sa vyskytujú
+  v každom pozitívnom trénovacom príklade. Potom $\hat{h}$ je
+  konzistentná so všetkými trénovacími príkladmi.
 \end{theorem}
 \begin{proof}
-  Ak $(x, y)$ je pozitívny príklad, v cieľovej hypotéze $c$ môžu byť
-  jedine tie premenné, ktoré majú v $x$ priradenú hodnotu $1$. Keď
-  túto úvahu zopakujeme pre všetky pozitívne príklady, dostaneme
-  niekoľko množín ``povolených premenných''. Cieľová premenná musí byť
-  podmnožinou všetkých z nich, teda je podmnožinou ich prieniku. Pritom
-  ich prienik je práve hypotéza $\hat{h}$.
+  Ak $(x, y)$ je pozitívny príklad, v batohu môže byť iba nejaká podmnožina
+  vecí z $x$. Keď túto úvahu zopakujeme pre všetky pozitívne príklady,
+  dostaneme niekoľko množín ``povolených vecí''. Skutočný obsah batoha
+  musí byť podmnožinou všetkých z nich, teda je podmnožinou ich prieniku.
+  Toto zároveň zachytáva všetku informáciu zo všetkých pozitívnych príkladov,
+  teda ľubovoľná hypotéza, ktorá je podmnožinou tohto prieniku,
+  je konzistentná s pozitívnymi príkladmi.
   
-  Z toho vyplýva, že ak nie je splnené $c$, nemôže byť splnené ani $h$.
-  Naša hypotéza totiž kladie ešte väčšie požiadavky na hodnoty
-  premenných. Teda,
-  $$(c(x) = 0) \implies (h(x) = 0),$$
-  takže $h$ je konzistentná s negatívnymi príkladmi.
+  Čo ale s negatívnymi príkladmi? Ak by sme zobrali príliš malú
+  množinu vecí ako hypotézu, mohol by nastať problém s negatívnymi
+  príkladmi. (Napríklad ak máme príklady $(0110, 0)$ a $(1100, 1)$,
+  nemôžeme ako hypotézu zvoliť $0100$ ani $0000$, lebo by to bolo
+  v rozpore s prvým príkladom.)
   
-  Čo sa týka pozitívnych príkladov, v $h$ sú všetky tie premenné, ktoré
-  sme do nej mohli dať tak, aby bola konzistentná so všetkými pozitívnymi
-  príkladmi. Teda jej konzistentnosť s pozitívnymi príkladmi vyplýva
-  priamo z jej konštrukcie.
+  Ak ale zoberieme celý prienik ako našu hypotézu $\hat{h}_T$, nemôže
+  sa to stať. Totiž, skutočný obsah batoha je podmnožinou oného
+  prieniku, a teda ak $\hat{h}_T \subseteq x$, tak nutne aj
+  $c \subseteq x$. Obmenou tejto implikácie dostaneme, že ak
+  $c \not\subseteq x$, tak aj $\hat{h}_T \not\subseteq x$, takže
+  naša hypotéza dáva na negatívnych príkladoch rovnaké výsledky.
 \end{proof}
 
 Uvedieme teraz niektoré výsledky z predchádzajúcej časti tak, ako platia
 pre problém konjunkcie.
 
-\begin{corollary}
-  Platí
-  $$ \chalg \leq \frac{1}{t} \cdot \left( n \ln{2} + \ln{t} + 1 \right) = O\left( \frac{n + \ln{t}}{t} \right). $$
-\end{corollary}
-\begin{corollary} \label{cor:mconj_de}
-  Aby sme mali zaručené (s pravdepodobnosťou aspoň $1 - \delta$), že
-  dostaneme hypotézu s chybou nanajvýš $\varepsilon$, stačí zvoliť
-  veľkosť trénovacej množiny nasledovne:
+\begin{theorem}
+  Pre problém konjunkcie platí
+  $$ \Err(L) \leq \frac{1}{t} \cdot \left( n \ln{2} + \ln{t} + 1 \right) = O\left( \frac{n + \ln{t}}{t} \right). $$
+\end{theorem}
+\begin{theorem} \label{cor:mconj_de}
+  Pre problém konjunkcie platí, že aby sme zlú hypotézu (s chybou aspoň
+  $\varepsilon$) dostali iba s malou pravdepodobnosťou (nanajvýš $\delta$),
+  stačí zvoliť veľkosť trénovacej množiny nasledovne:
   $$ t \geq \frac{1}{\varepsilon} \cdot \left( n \ln{2} + \ln{\frac{1}{\delta}} \right) = \Omega\left( \frac{n + \ln{\frac{1}{\delta}}}{\varepsilon} \right) $$
-\end{corollary}
-
-Tieto odhady sú relatívne tesné. Vo všeobecnom prípade je ťažké dostať
-nejaký dolný odhad, nakoľko pravdepodobnostné rozdelenie $P$ a cieľový
-koncept $c$ môžu byť degenerované a ``uľahčiť algoritmu robotu''.
-Uvidíme ale, že pre niektoré ``ťažké'' prípady vieme spraviť dolný odhad.
-
-\begin{theorem} \label{thm:mconj_lb}
-  Existuje pravdepodobnostné rozdelenie $P$ a cieľový koncept $c \in C$
-  také, že nech je trénovací algoritmus ľubovoľný, pre jeho chybu platí
-  nasledovný dolný odhad:
-  $$ \chalg \geq \frac{1}{2e} \cdot \frac{n-1}{t+1} = \Omega \left( \frac{n}{t} \right)$$
 \end{theorem}
 
-V znení vety je trochu obmedzujúce, že cieľový koncept musí byť
-pevne vybraný. Ukážeme teda najprv, že pokiaľ tvrdenie dokážeme
-pre náhodne vybrané $c$, bude z neho plynúť pôvodné tvrdenie.
+\paragraph{Dolné odhady.} Tieto odhady sú relatívne tesné. Ako veľmi ich
+vieme zlepšiť? Vieme dostať aj nejaké dolné odhady, t.j. tvrdenia hovoriace,
+že ak sa chceme nejakú množinu hypotéz naučiť, potrebujeme aspoň toľkoto
+trénovacích príkladov?
 
-\begin{lemma}
-  Nech $P_C$ je pravdepodobnostné rozdelenie nad množinou konceptov $C$.
-  Cieľovú hypotézu vyberieme náhodne podľa $P_C$. Ak pre nejaké číslo
-  $k$ platí, že stredná hodnota chyby algoritmu je aspoň $k$, tj.
-  $$\E_{c \sim P_C} \left[ \chalg \right] \geq k,$$
-  tak existuje voľba cieľového konceptu $c \in C$ taká, že chyba
-  algoritmu bude tiež aspoň $k$.
-\end{lemma}
+Netriviálny dolný odhad na všetky prípady sa nedá dostať, nakoľko
+pravdepodobnostné rozdelenie $P$ môže byť degenerované a ``uľahčiť
+algoritmu robotu''. (Napríklad keď $P$ priradí všetkých $100\%$
+jednej dvojici $(x, y)$.) Prirodzenejšie je teda hľadať nejaké
+jedno ťažké rozdelenie $P$. Toto rozdelenie ale môže závisieť od
+konkrétneho trénovacieho algoritmu; nestačí len predpokladať, že
+algoritmus je všemohúci, nakoľko možných výsledných hypotéz môže
+byť viacero a ťažkosť rozdelenia $P$ závisí od toho, ako sa hypotéze
+darí mimo trénovacích príkladov.
+
+Budeme teda hľadať tvrdenia tvaru: pre každý algoritmus $L$ existuje
+rozdelenie $P$, na ktorom potrebuje $L$ aspoň nejaké množstvo trénovacích
+príkladov, aby sa mu dobre darilo.
+
+Dokazovať to v takomto tvare sa ale ukazuje byť ťažké. Problém je v tom,
+že nájsť konkrétne ťažké rozdelenie $P$ môže byť ťažké. V matematike nie vždy
+vieme ľahko nájsť konkrétny príklad s nejakou vlastnosťou; možno ale
+vieme ľahko dokázať, že taký objekt musí existovať. Tak tomu bude aj teraz;
+v dôkaze budeme využívať nasledovnú všeobecnú metavetu:
+
+\begin{theorem}
+  Ak chceme dokázať, že existuje objekt $o$ spĺňajúci $f(o) \geq l$,
+  kde $f$ reprezentuje nejakú vlastnosť objektu $o$ a hodnota $l$
+  je nejaká ľubovoľná hranica, stačí dokázať, že pre $o$ náhodne
+  vybrané z nejakého rozdelenia $O$ platí
+  $$ \E_{o \sim O} \left[ f(o) \right] \geq l. $$
+\end{theorem}
 \begin{proof}
-  Ak by na každom cieľovom koncepte bola chyba algoritmu menšia ako $k$,
-  potom by aj ľubovoľný vážený priemer chýb (zodpovedajúci strednej
-  hodnote s rozdelením $P_C$) bol menší ako $k$. To by bol spor.
+  Ak je hodnota $f(o)$ v priemere aspoň $l$, tak aspoň v jednom konkrétnom
+  prípade (t.j. pre jedno konkrétne $o$) musí byť tiež väčšia rovná $l$.
+  Formálne zapísaná obmena tejto implikácie:
+  $$ (\forall o \in O: f(o) < l) \implies \E_{o \sim O} \left[ f(o) \right] < l. $$
 \end{proof}
 
-Ďalej pokračujeme dôkazom vety \ref{thm:mconj_lb}. V ňom si už môžeme
-dovoliť vyberať cieľový koncept náhodne.
+V našom prípade namiesto hľadania jedného konkrétneho ťažkého
+rozdelenia $P$ ho zvolíme náhodne. Potom ukážeme, že OTeChAlg
+bude vysoká (pričom stredná hodnota sa berie aj cez náhodné voľby
+rozdelenia $P$).
 
+\begin{theorem} \label{thm:mconj_lb}
+  Pre problém konjunkcie platí, že pre ľubovoľný algoritmus $L$ existuje
+  rozdelenie $P$ také, že pre $t \geq n - 1$ platí pre OTeChAlg platí
+  nasledovný dolný odhad:
+  $$ \Err(L) \geq \frac{1}{2e} \cdot \frac{n-1}{t+1} = \Omega \left( \frac{n}{t} \right)$$
+  Pre $t < n - 1$ platí iný dolný odhad:
+  $$ \Err(L) \geq \frac{1}{2e} = \Omega \left( 1 \right). $$
+\end{theorem}
 \begin{proof}
-  Zvolíme pravdepodobnostné rozdelenie, ktoré priradí nenulovú
-  pravdepodobnosť iba nasledovnej sade vstupov. Konkrétne
-  pravdepodobnosti určíme neskôr v dôkaze tak, ako sa nám to bude hodiť.
-  \begin{align}
-    x^{(1)} &= (0, 1, 1, \ldots, 1, 1) \\
-    x^{(2)} &= (1, 0, 1, \ldots, 1, 1) \\
-            &\vdots \\
-    x^{(n)} &= (1, 1, 1, \ldots, 1, 0)
-  \end{align}
-  Tieto vstupy majú nasledujúcu vlastnosť. Pre ľubovoľný koncept $c$
-  platí, že sa v ňom nachádza konjunkcia $x_i$ vtedy a len vtedy, keď
-  $f(x^{(i)}) = 0$. Každý z týchto vstupov sa dá teda chápať ako
-  ``test na niektorú premennú''.
+  Predstavme si, že v rozdelení $P$ vystupujú (t.j. majú nenulovú
+  pravdepodobnosť) iba tie vstupy, ktoré obsahujú presne $n - 1$
+  vecí, teda práve jedna vec v množine nie je. Označme tieto vstupy
+  $x^{(1)}, \ldots, x^{(n)}$ podľa toho, ktorá vec chýba.
   
-  Trénovacie príklady potom môžeme chápať tak, že algoritmu dávajú
-  informáciu o jednotlivých premenných: ``Je alebo nie je v cieľovej
-  hypotéze?'' Pokiaľ ale niektorý zo vstupov $x^{(i)}$ nie je medzi
-  trénovacími príkladmi, nemáme žiadnu informáciu o tom, či sa tam
-  príslušná premenná nachádza. Ak si potom $\hat{h}$ vytiahne pri
-  testovaní takýto vstup, môže jedine hádať, aká je správna odpoveď.
-  Šanca úspechu pri hádaní bude $\frac{1}{2}$, pokiaľ vyberieme $c$
-  rovnomerne náhodne z celej množiny konceptov.
+  Ľubovoľná hypotéza $h$ vráti na vstupe $x^{(i)}$ hodnotu $1$ práve
+  vtedy, keď vec $i$ v hypotéze nie je; hodnotu $0$ vráti vtedy, keď tam
+  vec $i$ je. Tieto vstupy teda zodpovedajú otázkam tvaru:
+  ``Je pravda, že vec $v$ nie je v batohu?''
+  
+  Takže každý trénovací príklad nám dáva informáciu iba o prítomnosti
+  jednej veci. Počas testovania teda vieme správnu odpoveď iba na
+  tých vstupoch, ktoré sme dostali ako trénovacie príklady. Na ostatných
+  môžeme vo všeobecnosti iba hádať, či v batohu príslušná vec je alebo
+  nie je.
+  
+  Takže na vstupoch, ktoré sú v trénovacej množine, budeme mať chybu $0$.
+  Ak bol obsah batoha (t.j. výstupy $y$) zvolený rovnomerne náhodne
+  spomedzi všetkých $2^n$ možností, tak na ostatných vstupoch budeme
+  mať očakávanú chybu $\frac{1}{2}$.
   
   Označme si pravdepodobnosti pridelené jednotlivým vstupom $p_1, \ldots, p_n$.
-  Aká je šanca, že pri trénovaní vstup $x^{(i)}$ nedostaneme a potom si ho
-  pri testovaní vytiahneme?
+  OTeChAlg vieme zmerať tak, že si náhodne vytiahneme trénovacie príklady
+  a náhodne vytiahneme testovací príklad. Potom na trénovacích príkladoch
+  natrénujeme hypotézu $\hat{h}_T$, zmeriame jej chybu na testovacom príklade,
+  a spravíme strednú hodnotu tohto procesu. Aká je šanca, že pri trénovaní
+  vstup $x^{(i)}$ nedostaneme a potom si ho pri testovaní vytiahneme?
   $$p_i \cdot (1 - p_i)^t$$
-  Celková pravdepodobnosť, že si vytiahneme pri testovaní vstup mimo
-  trénovacej množiny, je potom súčet jednotlivých pravdepodobností
-  (nakoľko sú jednotlivé udalosti dizjunktné):
-  $$\sum_{i=1}^n p_i \cdot (1 - p_i)^t$$
-  V týchto prípadoch bude mať $\hat{h}$ chybu $\frac{1}{2}$. V ostatných
-  prípadoch sme si vytiahli počas testovania nejaký príklad, ktorý bol aj
-  v trénovacej množine. Pokiaľ sme si ho zapamätali, tak budeme mať chybu
-  $0$, v každom prípade bude ale chyba aspoň $0$. Dostávame tak nasledovný
-  dolný odhad na chybu algoritmu:
-  $$ \E_{c \in C} \left[ \chalg \right] \geq \frac{1}{2} \cdot \left( \sum_{i=1}^n p_i \cdot (1 - p_i)^t \right) $$
   
-  Ako ale zvoliť $p_1, \ldots, p_n$ tak, aby sme dostali dobrý dolný
-  odhad? Skúsime zvoliť $p_i$ také, pre ktoré nadobúda výraz
-  $p_i \cdot (1 - p_i)^t$ maximum. Zderivovaním a položením rovné
-  $0$ dostaneme
+  Celková pravdepodobnosť, že si pri testovaní vytiahneme vstup
+  mimo trénovacej množiny, je potom súčtom týchto pravdepodobností
+  cez všetky vstupy $x^{(i)}$:
+  $$\sum_{i=1}^n p_i \cdot (1 - p_i)^t$$
+  
+  Tieto prípady prispievajú do chyby $1/2$, ostatné prípady prispievajú $0$.
+  Dostávame tak nasledovný dolný odhad na chybu algoritmu:
+  $$ \Err(L) \geq \frac{1}{2} \cdot \left( \sum_{i=1}^n p_i \cdot (1 - p_i)^t \right) $$
+  
+  Ako zvoliť $p_1, \ldots, p_n$ tak, aby sme dostali dobrý dolný
+  odhad? Skúsme zvoliť $p_i$ také, pre ktoré nadobúda výraz
+  $p_i \cdot (1 - p_i)^t$ maximum. Zderivovaním a položením
+  rovné $0$ dostaneme
   $$p_i = \frac{1}{t+1}.$$
-  Pokiaľ ale $t \neq n - 1$, nemôžeme zvoliť všetky pravdepodobnosti
-  takéto: pre $t < n - 1$ je súčet pravdepodobností priveľký a pre $t > n - 1$
-  primalý. Prvý prípad nás nezaujíma, nakoľko je to ``len konštanta''
-  (v zmysle $t \to \infty$). V druhom prípade si vieme zvoliť jedného
-  ``obetného baránka'' $p_1$, ktorému priradíme celú zvyšnú
+  
+  Pokiaľ $t \neq n - 1$, nemôžeme zvoliť všetky pravdepodobnosti
+  takéto: pre $t > n - 1$ by bol súčet pravdepodobností primalý
+  a pre $t < n - 1$ priveľký. Rozoberme tieto prípady osobitne.
+  
+  \paragraph{Prvý prípad ($t \geq n - 1$).} Všetkým vstupom okrem jedného
+  priradíme pravdepodobnosť $1/(t+1)$; posledný vstup dostane všetkú zvyšnú
   pravdepodobnosť.
-  \begin{align}
-    p_1 &= 1 - \frac{n-1}{t+1} \\
-    p_2 &= \frac{1}{t+1} \\
-        &\vdots \\
-    p_n &= \frac{1}{t+1}
-  \end{align}
-  Dosadíme a dostaneme tak odhad:
-  $$ \E_{c \in C} \left[ \chalg \right] \geq \frac{1}{2} \cdot \left( (n - 1) \cdot \frac{1}{t+1} \cdot \left( 1 - \frac{1}{t+1} \right)^t + \frac{n-1}{t+1} \cdot \left( 1 - \frac{n-1}{t+1} \right)^t   \right) $$
-  Odignorujeme druhý sčítanec, čím sa nám výraz na pravej strane môže
-  len zmenšiť, takže nerovnosť sa zachová. Ďalej použijeme odhad
+  $$ p_1 = p_2 = \ldots = p_{n-1} = \frac{1}{t+1},\ p_n = 1 - \frac{n-1}{t+1}$$
+  Dosadíme a dostaneme tak odhad
+  $$ \Err(L) \geq \frac{1}{2} \cdot \left( (n - 1) \cdot \frac{1}{t+1} \cdot \left( 1 - \frac{1}{t+1} \right)^t + \frac{n-1}{t+1} \cdot \left( 1 - \frac{n-1}{t+1} \right)^t \right). $$
+  Druhý sčítanec zdola odhadneme ako $0$ a ďalej použijeme odhad
   $$ \left( 1 - \frac{1}{t+1} \right)^t \geq \frac{1}{e}, $$
-  ktorý platí pre všetky prirodzené $t$. (Tento odhad sa dá dokázať
-  napríklad tak, že sa dokáže, že daný výraz je rastúci od $t$. Odhad
-  z toho už plynie ľahko, nakoľko jeho limita pre $t \to \infty$ je
-  práve $\frac{1}{e}$.) Dostaneme tak požadovanú nerovnosť:
-  $$ \E_{c \in C} \left[ \chalg \right] \geq \frac{1}{2e} \cdot \frac{n-1}{t+1} $$
+  ktorý platí pre všetky prirodzené $t$. Dostaneme tak nerovnosť
+  $$ \Err(L) \geq \frac{1}{2e} \cdot \frac{n-1}{t+1}. $$
+  
+  \paragraph{Druhý prípad ($t < n - 1$).} Prvým $t+1$ vstupom priradíme
+  pravdepodobnosť $1/(t+1)$, ostatné vstupy dostanú pravdepodobnosť $0$.
+  Dostaneme tak odhad
+  \begin{align}
+    \Err(L) &\geq \frac{1}{2} \cdot (t + 1) \cdot \frac{1}{t+1} \cdot \left( 1 - \frac{1}{t+1} \right)^t \\
+    \Err(L) &\geq \frac{1}{2e}
+  \end{align}
+  
+  
 \end{proof}
 
+\begin{comment}
 Dolný odhad zodpovedajúci dôsledku \ref{cor:mconj_de} uvedieme bez dôkazu.
 
 \begin{theorem}
@@ -358,6 +407,7 @@ Dolný odhad zodpovedajúci dôsledku \ref{cor:mconj_de} uvedieme bez dôkazu.
 \end{theorem}
 
 \TODO{dôkaz}
+\end{comment}
 
 
 
