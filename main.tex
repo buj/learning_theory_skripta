@@ -5,6 +5,25 @@
 \usepackage[T1]{fontenc}
 \usepackage[slovak]{babel}
 
+% appendixy na konci kazdej kapitoly
+\usepackage{appendix}
+\usepackage{chngcntr}
+\usepackage{etoolbox}
+  
+  % Start of subappendices environment
+  \AtBeginEnvironment{subappendices}{%
+    \chapter*{Appendix}
+    \addcontentsline{toc}{chapter}{Appendix}
+    \counterwithin{figure}{section}
+    \counterwithin{table}{section}
+  }
+  
+  % End of subappendices environment
+  \AtEndEnvironment{subappendices}{%
+    \counterwithout{figure}{section}
+    \counterwithout{table}{section}
+  }
+
 % mensie okraje
 \usepackage{geometry}
 \geometry{margin=1in}
@@ -50,10 +69,7 @@
 \newcommand{\rozptyl}{{\epsilon_\text{est.}}}
 \newcommand{\rozptylT}{{\epsilon^T_\text{est.}}}
 
-\newcommand{\larr}{\leftarrow}
-\newcommand{\rarr}{\rightarrow}
-\newcommand{\uarr}{\uparrow}
-\newcommand{\darr}{\downarrow}
+\newcommand{\VC}{\mathrm{VC}}
 
 
 \newcommand{\TODO}[1]{\noindent {\color{red} TODO #1} \\}

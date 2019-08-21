@@ -94,6 +94,9 @@ Používame názov PAC$\star$ naučiteľná preto, lebo skutočná (v literatúr
 zaužívaná) definícia PAC naučiteľnosti je o čosi komplikovanejšia: berie
 väčší ohľad na výpočtové detaily, ktorým sa my chceme zatiaľ vyhnúť.
 
+Niekedy budeme uvažovať konkrétny trénovací algoritmus; v takých prípadoch
+budeme hovoriť o PAC$\triangle$ naučiteľnosti.
+
 
 
 
@@ -456,7 +459,7 @@ teda konzistentný aj s negatívnymi trénovacími príkladmi.
 \end{figure}
 
 \begin{theorem}
-  Obdĺžniková hra je PAC$\star$ naučiteľná: pre ľubovoľné rozdelenie $P$,
+  Obdĺžniková hra je PAC$\triangle$ naučiteľná: pre ľubovoľné rozdelenie $P$,
   ľubovoľne malé hranice $\varepsilon > 0$ a $\delta > 0$, ak pre počet
   pozitívnych trénovacích príkladov $t^+$ platí
   $$ t^+ \geq \frac{4}{\varepsilon} \cdot \ln{\frac{4}{\delta}}, $$
@@ -564,50 +567,97 @@ v štýle PAC učenia. Na jej definíciu budeme potrebovať niekoľko pomocných
 pojmov.
 
 \begin{definition}
-  Majme konečnú podmnožinu vstupov $S \subseteq X$. Hovoríme, že množina
+  Majme konečnú množinu vstupov $S \subseteq X$. Hovoríme, že množina
   hypotéz $H$ \emph{rozbíja} množinu $S$, ak platí: nech označíme vstupy
   v $S$ ako pozitívne alebo negatívne akokoľvek, v množine $H$ existuje
   hypotéza konzistentná s týmto označením.
 \end{definition}
 
-Intuitívne, množina $S$ je rozbitá hypotézami $H$, ak nie je pre
-hypotézy v $H$ príliš náročné modelovať príklady v $S$: sú schopné
-ich modelovať akokoľvek.
+Inými slovami, množina $S$ je rozbitá množinou hypotéz $H$, ak sa hypotézy
+z tejto množiny vedia správať na vstupoch $S$ akokoľvek; všetkých $2^{|S|}$
+možných označení je konzistentných s niektorou hypotézou v $H$. Takéto
+označenia budeme nazývať \emph{realizovateľné}.
 
 \begin{definition}
   Vapnik-Chervonenkisova dimenzia množiny hypotéz $H$, označovaná
-  $VCD(H)$, je veľkosť najväčšej množiny $S \subseteq X$, ktorá
-  sa dá rozbiť hypotézami v $H$. Ak sa dá rozbiť ľubovoľne veľká
-  množina $S$, definujeme $VCD(H) = \infty$.
+  $\VC(H)$, je veľkosť najväčšej rozbiteľnej množiny vstupov $S \subseteq X$.
+  Ak sa dá rozbiť ľubovoľne veľká množina $S$, definujeme $\VC(H) = \infty$.
 \end{definition}
 
-Teda na to, aby sme ukázali dolný odhad $VCD(H) \geq d$, stačí nám
-nájsť jednu množinu $S$ veľkosti $d$, ktorá sa dá rozbiť. Aby sme ale
-ukázali horný odhad $VCD(H) \leq d$, musíme ukázať, že žiadna množina
-veľkosti $d + 1$ sa nedá rozbiť: teda že existuje také označenie vstupov,
-pre ktoré neexistuje v $H$ konzistentný klasifikátor. Z tohto dôvodu je
-obvykle ťažšie dokázať horný odhad na VC dimenziu, ako dolný odhad.
+Pokiaľ bude z kontextu jasné, akú množinu hypotéz uvažujeme, budeme jej
+VC dimenziu označovať $d$.
 
-\begin{lemma}
-  Majme dve množiny hypotéz $H$ a $H'$ nad tou istou množinou vstupov $x$.
-  Ak platí $H \supseteq H'$, tak potom platí $VCD(H) \succeq VCD(H')$ (kde
-  $\succeq$ je relácia $\geq$ prirodzene rozšírená na $\N \cup \{ \infty \}$).
-\end{lemma}
+Od miery zložitosti očakávame isté intuitívne vlastnosti, napríklad že
+zväčšením množiny hypotéz sa môže zložitosť iba zvýšiť. Toto skutočne
+platí pre VC dimenziu.
+
+\begin{theorem}
+  Nech pre množiny hypotéz $H$ a $H'$ platí $H \supseteq H'$. Potom
+  $\VC(H) \succeq VC(H')$, kde $\succeq$ je relácia $\geq$ prirodzene
+  rozšírená na $\N \cup \{ \infty \}$).
+\end{theorem}
 \begin{proof}
-  Ak sa množina $S$ dá rozbiť pomocou $H'$, potom, pretože každá hypotéza
-  v $H'$ je aj v $H$, dá sa táto množina rozbiť aj pomocou $H$ (rovnakým
-  spôsobom).
+  Množina $S$ sa dá rozbiť pomocou $H'$ vtedy, keď každé označenie je
+  realizovateľné niektorou hypotézou v $H'$. Pretože každá hypotéza v
+  $H'$ je aj v $H$, je každé označenie realizovateľné aj pomocou $H$.
 \end{proof}
 
-Než uvedieme vety hovoriace o PAC naučiteľnosti, uvedieme príklady
-niektorých nekonečných množín hypotéz, a neformálne zdôvodníme ich
-VC dimenzie. Väčšinou budú geometrického charakteru (čo je prirodzené,
-ak máme mať nekonečnú množinu hypotéz).
+
+\subsubsection{Súvis s PAC naučiteľnosťou}
+
+Konkrétny súvis medzi VC dimenziou a PAC naučiteľnosťou (a dôkazy týchto
+vzťahov) zatiaľ vynecháme, uvedieme tu iba znenia viet. Pre záujemcov
+odporúčame sekciu \hyperref[vcdim:proof]{appendix}.
+
+\begin{theorem}[Blumer et. al., 1989 \cite{blumer1989learnability}]
+  Ak je VC dimenzia konečná, tak je množina hypotéz $H$ PAC$\star$
+  naučiteľná: pre ľubovoľné rozdelenie $P$, ľubovoľne malé hranice
+  $\varepsilon$ a $\delta$, ak počet trénovacích príkladov $t$ spĺňa
+  $$ t \geq c_0 \left( \frac{1}{\varepsilon} \cdot \ln \left( \frac{1}{\delta} \right) + \frac{d}{\varepsilon} \cdot \ln \left( \frac{1}{\varepsilon} \right) \right) $$
+  pre nejakú konštantu $c_0 > 0$ závislú iba od $H$, tak dostaneme
+  zlú hypotézu (s OTeCH aspoň $\varepsilon$) iba s malou
+  pravdepodobnosťou (nanajvýš $\delta$).
+\end{theorem}
+
+\begin{theorem}[Haussler et. al., 1994 \cite{haussler1994predicting}]
+  OTeChAlg vieme zhora asymptoticky odhadnúť nasledovne:
+  $$ \Err(L) = O \left( \frac{d}{t} \cdot \ln \left( \frac{t}{d} \right) \right). $$
+\end{theorem}
+
+Dosiaľ sme všade predpokladali, že naša množina hypotéz $H$ je úplná.
+Ukazuje sa ale, že aj v prípade neúplnej množiny hypotéz vieme dostať
+odhad na OTeCh hypotézy. Už ale nemôžeme požadovať ľubovoľne malú OTeCh
+hypotézy; namiesto toho ju budeme porovnávať s $h^\star$ (najlepšou
+možnou hypotézou v $H$).
+
+\begin{theorem}[Vapnik \& Chervonenkis, 1971 \cite{chervonenkis1971theory}]
+  Pre ľubovoľné rozdelenie $P$, ľubovoľne malé hranice $\varepsilon$
+  a $\delta$, ak počet trénovacích príkladov spĺňa
+  $$ t \geq c_0 \left( \frac{1}{\varepsilon} \cdot \ln \left( \frac{1}{\delta} \right) + \frac{d}{\varepsilon} \cdot \ln \left( \frac{1}{\varepsilon} \right) \right), $$
+  pre nejakú konštantu $c_0$ závislú iba od množiny hypotéz $H$,
+  tak sa iba s malou pravdepodobnosťou stane, že hypotéza $\hat{h}_T$
+  je oveľa horšia od hypotézy $h^\star$:
+  $$ \prob_T( \Err(\hat{h}_T) \geq \Err(h^\star) + \varepsilon ) \leq \delta. $$
+\end{theorem}
+
+
+\subsubsection{Použitie}
+
+Na to, aby sme ukázali dolný odhad $\VC(H) \geq d$, nám stačí nájsť jednu
+množinu $S$ veľkosti $d$, ktorá sa dá rozbiť. Aby sme ale ukázali horný
+odhad $\VC(H) \leq d$, musíme ukázať, že žiadna množina veľkosti $d + 1$
+sa nedá rozbiť; teda že pre každú $(d + 1)$-ticu vstupov existuje
+nerealizovateľné označenie. Z tohto dôvodu je obvykle ťažšie dokázať
+horný odhad na VC dimenziu, ako dolný odhad.
+
+Ďalej uvedieme príklady niektorých nekonečných množín hypotéz a zdôvodníme
+ich VC dimenzie.
 
 \paragraph{Intervaly na reálnych číslach.} Nie je ťažké vidieť, že
 ľubovoľná dvojica bodov sa dá rozbiť. Na druhej strane, ak máme tri
-body, tak ich vieme označiť ako na obrázku \ref{vc:interval}, čo nie
-je konzistentné so žiadnym intervalom. Takže VC dimenzia je $2$.
+body, tak ich vieme označiť ako na obrázku \ref{vc:interval}; toto
+označenie nie je realizovateľné žiadnym intervalom. Takže VC dimenzia
+je $2$.
 
 \begin{figure}
   \centering
@@ -618,11 +668,11 @@ je konzistentné so žiadnym intervalom. Takže VC dimenzia je $2$.
 
 \paragraph{Polroviny v rovine.} Každá trojica bodov tvoriacich
 nedegenerovaný trojuholník sa dá rozbiť, ako je ilustrované na
-obrázku \ref{vc:halfplane}. Na druhej strane, žiadna štvorica bodov
-sa rozbiť nedá: ak tvoria konvexný štvoruholník, tak jednu protiľahlú 
-dvojicu označíme kladne a druhú záporne. Ak tvoria nekonvexný 
-štvoruholník, jeden z bodov je vo vnútri trojuholníka tvoreného 
-ostatnými tromi: tento bod označíme kladne a ostatné body záporne.
+obrázku \ref{vc:halfplane}. Ukážeme, že žiadna štvorica bodov
+sa rozbiť nedá. Ak tvoria konvexný štvoruholník, tak jednu protiľahlú 
+dvojicu označíme pozitívne a druhú negatívne. Ak tvoria nekonvexný 
+štvoruholník, jeden z jeho vrcholov je vo vnútri trojuholníka tvoreného 
+ostatnými tromi: tento bod označíme pozitívne a ostatné body negatívne.
 Takže VC dimenzia je $3$.
 
 \begin{figure}
@@ -649,13 +699,13 @@ Takže VC dimenzia je $3$.
 \end{figure}
 
 \paragraph{Osovorovnobežné obdĺžniky.} Štvorica bodov, ktorá sa dá
-rozbiť, je ilustrovaná na obrázku \ref{vc:rect}, nie každá štvorica
-bodov sa ale dá rozbiť. Na druhej strane, žiadna pätica bodov sa nedá
-rozbiť. Rozoberieme dva prípady: ak je aspoň jeden z bodov vo vnútri 
-bounding boxu (nie na okraji), tak ho označíme záporne a všetky body na 
-okraji kladne. Ak sú všetky body na obvode bounding boxu, na jednej 
-strane toho obdĺžnika musia ležať aspoň dva body. Jeden z nich označíme 
-kladne a druhý záporne. Takže VC dimenzia je $4$.
+rozbiť, je ilustrovaná na obrázku \ref{vc:rect} (nie každá štvorica
+bodov sa ale dá rozbiť). Ukážeme, že žiadna pätica bodov sa nedá
+rozbiť. Ak je aspoň jeden z bodov vo vnútri bounding boxu (nie
+na okraji), tak ho označíme negatívne a všetky body na okraji pozitívne.
+Ak sú všetky body na obvode bounding boxu, na jednej strane toho boxu
+musia ležať aspoň dva body. Jeden z nich označíme pozitívne a druhý
+negatívne. Takže VC dimenzia je $4$.
 
 \begin{figure}
   \centering
@@ -691,45 +741,8 @@ kladne a druhý záporne. Takže VC dimenzia je $4$.
   \label{vc:rect}
 \end{figure}
 
-\medskip
 
-Nakoniec hlavný výsledok, kvôli ktorému je VC dimenzia zaujímavá.
 
-\begin{theorem}[Blumer et. al., 1989 \cite{blumer1989learnability}]
-  Nech $C$ je ľubovoľná množina konceptov. Nech $H$ je množina hypotéz
-  s VC dimenziou rovnou $d$. Nech $L$ je ľubovoľný algoritmus, ktorý
-  pre ľubovoľnú sadu $t$ trénovacích príkladov vráti hypotézu $\hat{h}$
-  konzistentnú s príkladmi. Potom $L$ je PAC trénovací algoritmus pre
-  množinu konceptov $C$ s použitím hypotéz v $H$, pokiaľ je $t$
-  dostatočne veľké:
-  $$ t \geq c_0 \left( \frac{1}{\varepsilon} \ln{\frac{1}{\delta}} + \frac{d}{\varepsilon} \ln{\frac{1}{\varepsilon}} \right) $$
-  pre nejakú konštantu $c_0 > 0$.
-\end{theorem}
-
-\TODO{dôkaz}
-
-\begin{theorem}[Haussler et. al., 1994 \cite{haussler1994predicting}]
-  Ak VC dimenzia je $d$, tak ľubovoľný trénovací algoritmus, ktorý vždy
-  vracia hypotézy konzistentné s trénovacími príkladmi, má chybu nanajvýš
-  $$ \E \left[ \err(\hat{h}) \right] = O\left( \frac{d}{t} \ln{\frac{t}{d}} \right). $$
-\end{theorem}
-
-\TODO{dôkaz}
-
-Čo ale v prípade, že neexistuje konzistentný klasifikátor? Taká situácia
-nastane, keď buď cieľový koncept nie je v množine hypotéz, alebo keď v
-probléme vystupuje šum. Ukazuje sa, že aj v takom prípade sa dá
-odhadnúť chyba hypotézy.
-
-\begin{theorem}[Vapnik \& Chervonenkis, 1971 \cite{chervonenkis1971theory}]
-  Nech $h^\star$ je hypotéza v $H$ s najmenšou (testovacou) chybou a
-  nech $\hat{h}$ je hypotéza v $H$ s najmenšou trénovacou chybou. Ak
-  $VCD(H) = d$, tak pre počet trénovacích príkladov
-  $$ t \geq c_0 \left( \frac{1}{\varepsilon} \ln{\frac{1}{\delta}} + \frac{d}{\varepsilon} \ln{\frac{1}{\varepsilon}} \right), $$
-  kde $c_0$ je nejaká konštanta, platí, že s veľkou pravdepodobnosťou
-  je chyba hypotézy $\hat{h}$ dostatočne malá (berúc v úvahu najmenšiu
-  dosiahnuteľnú chybu):
-  $$ \prob( \err(\hat{h}) > \err(h^\star) + \varepsilon ) \leq \delta. $$
-\end{theorem}
-
-\TODO{dôkaz}
+\begin{subappendices}
+  \input{cast2-vc-dim-dokaz.tex}
+\end{subappendices}
