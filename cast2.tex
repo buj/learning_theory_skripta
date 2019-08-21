@@ -390,8 +390,6 @@ rozdelenia $P$).
     \Err(L) &\geq \frac{1}{2} \cdot (t + 1) \cdot \frac{1}{t+1} \cdot \left( 1 - \frac{1}{t+1} \right)^t \\
     \Err(L) &\geq \frac{1}{2e}
   \end{align}
-  
-  
 \end{proof}
 
 \begin{comment}
@@ -414,143 +412,127 @@ Dolný odhad zodpovedajúci dôsledku \ref{cor:mconj_de} uvedieme bez dôkazu.
 
 \section{Nekonečné množiny hypotéz}
 
-Vyššie uvedený postupy pre konečné množiny hypotéz zlyhajú, ak
-$|H| = \infty$: nedostaneme z nich žiaden odhad. Aj pre nekonečné
-množiny hypotéz je ale možné odvodiť horné odhady. Tie sa už nebudú
-odvíjať od veľkosti množiny $H$, ale od nejakej jej miery zložitosti.
-Touto mierou zložitosti bude tzv. \emph{Vapnik-Chervonenkisova dimenzia}.
-Predtým sa ale pozrieme na jednoduchý príklad.
+Vyššie uvedené postupy pre konečné množiny hypotéz zlyhajú, ak
+$|H| = \infty$. Aj pre nekonečné množiny hypotéz je ale možné
+odvodiť horné odhady. Tie sa už nebudú odvíjať od veľkosti množiny $H$,
+ale od nejakej jej miery zložitosti. Touto mierou zložitosti bude tzv.
+\emph{Vapnik-Chervonenkisova dimenzia}. Najprv sa ale pozrieme
+na jednoduchý príklad.
 
 
 
 
 \subsection{Obdĺžniková hra}
 
-Ide o klasifikačnú úlohu. Množina vstupov sú všetky body v rovine.
-Množina konceptov sú všetky obdĺžniky, ktorých strany sú rovnobežné
-so súradnicovými osami. Pre každý bod v rovine sa teda pýtame, či je
-vo vnútri cieľového obdĺžnika $c$ alebo nie. Body na okraji obdĺžnika
-považujeme, že sú vnútri.
+Množinou inštancii sú všetky body roviny a množinou hypotéz sú všetky
+obdĺžniky, ktorých strany sú rovnobežné so súradnicovými osami. Obdĺžnik
+chápeme ako funkciu, ktorá vracia $1$ pre tie body, ktoré sú vo vnútri
+obdĺžnika (vrátane jeho okrajov).
 
 Pre jednoduchosť argumentu použijeme konkrétny trénovací algoritmus.
 Dôkaz by sa dal zovšeobecniť na prípad, kedy jediné, čo o algoritme
-predpokladáme je, že nám vracia konzistentný klasifikátor. S nasledovným
-konzistentným klasifikátorom to ale bude jednoduchšie.
+predpokladáme je to, že je všemohúci. S nasledovným konkrétnym algoritmom
+ale bude analýza jednoduchšia.
 
-\medskip
+\paragraph{Všemohúci trénovací algoritmus.} Z trénovacích príkladov 
+vezmeme tie pozitívne, a ako náš obdĺžnik $\hat{h}_T$ zvolíme najmenší
+osovorovnobežný obdĺžnik obsahujúci body z týchto príkladov (tzv.
+\emph{bounding box}). Túto konštrukciu ilustrujeme na obrázku \ref{rectgame:hath}.
 
-Z trénovacích príkladov vezmime tie pozitívne. Ako hypotézu $\hat{h}$
-zvolíme najmenší (vzhľadom na inklúziu) osovorovnobežný obdĺžnik,
-ktorý obsahuje všetky body vo vybraných príkladoch. Na obrázku
-\ref{rectgame:hath} ilustrujeme konštrukciu $\hat{h}$ a porovnávame
-ho s $c$.
+Takýto obdĺžnik zrejme obsahuje všetky pozitívne
+trénovacie príklady, je teda s nimi konzistentný. Pretože je to najmenší
+taký obdĺžnik, musí byť celý vo vnútri cieľového obdĺžnika. Nemôže sa teda
+stať, že by nejaký bod nepatril do $c$ ale patril do nášho obdĺžnika; je
+teda konzistentný aj s negatívnymi trénovacími príkladmi.
 
 \begin{figure}
   \centering
   \includegraphics[scale=1]{obrazky/rectgame1.pdf}
-  \caption{Obdĺžniková hra: najmenší obdĺžnik konzistentný s príkladmi.}
+  \caption{
+    Obdĺžniková hra: najmenší obdĺžnik konzistentný s príkladmi
+    v porovnaní s cieľovým obdĺžnikom.
+  }
   \label{rectgame:hath}
 \end{figure}
 
-\begin{lemma}
-  Každá množina bodov $(x_1, y_1), \ldots, (x_t, y_t)$ má unikátny
-  \emph{bounding box}: najmenší (vzhľadom na inklúziu) osovorovnobežný
-  obdĺžnik, ktorý ich všetky obsahuje.
-\end{lemma}
-\begin{proof}
-  Každý obdĺžnik je jednoznačne určený $x$-ovými súradnicami ľavého
-  a pravého okraja a $y$-ovými súradnicami dolného a horného okraja.
-  Označme ich $x_\larr, x_\rarr$ a $y_\darr, y_\uarr$.
-  Vo vnútri sú práve tie body $(x, y)$, ktoré spĺňajú
-  $$x_\larr \leq x \leq x_\rarr,\ y_\darr \leq y \leq y_\uarr.$$
-  Ak teda majú byť všetky spomínané body vo vnútri, musí platiť
-  $$
-    x_\larr \leq \min x_i,\ 
-    x_\rarr \geq \max x_i,\ 
-    y_\darr \leq \min y_i,\ 
-    y_\uarr \geq \max y_i
-  $$
-  Najmenší osovorovnobežný obdĺžnik, ktorý toto spĺňa, je ten, pre
-  ktorý nastávajú v jednotlivých nerovnostiach rovnosti. Teda
-  $x_\larr = \min x_i$, $x_\rarr = \max x_i$, $y_\darr = \min y_i$ a $y_\uarr = \max y_i$.
-\end{proof}
-\begin{corollary}
-  Obdĺžnik $\hat{h}$ je podmnožinou cieľového obdĺžnika $c$.
-\end{corollary}
-\begin{corollary}
-  Obdĺžnik $\hat{h}$ je konzistentný klasifikátor.
-\end{corollary}
-\begin{proof}
-  Konzistentnosť na pozitívnych príkladoch vyplýva z konštrukcie $\hat{h}$.
-  Každý negatívny príklad je mimo $c$ a teda aj mimo $\hat{h}$, je teda
-  konzistentný aj s negatívnymi príkladmi.
-\end{proof}
-
 \begin{theorem}
-  Obdĺžniková hra je PAC naučiteľná: pre každý cieľový obdĺžnik $c \in C$,
-  $\varepsilon > 0$, $\delta > 0$ a pravdepodobnostné rozdelenie $P$, ak
-  vyššie popísanému algoritmu dáme $t$ trénovacích príkladov z $P$ a
-  platí
-  $$ t \geq \frac{4}{\varepsilon} \cdot \ln{\frac{4}{\delta}}, $$
-  tak nám algoritmus s vysokou pravdepodobnosťou vráti hypotézu s nízkou
-  chybou:
-  $$ \prob(\err(\hat{h}) > \varepsilon) \leq \delta. $$
+  Obdĺžniková hra je PAC$\star$ naučiteľná: pre ľubovoľné rozdelenie $P$,
+  ľubovoľne malé hranice $\varepsilon > 0$ a $\delta > 0$, ak pre počet
+  pozitívnych trénovacích príkladov $t^+$ platí
+  $$ t^+ \geq \frac{4}{\varepsilon} \cdot \ln{\frac{4}{\delta}}, $$
+  tak nám algoritmus vráti zlú hypotézu (s OTeCh aspoň $\varepsilon$)
+  iba s malou pravdepodobnosťou (nanajvýš $\delta$).
 \end{theorem}
+
+Všimnime si, že v našom tvrdení vystupuje $t^+$ namiesto $t$. Ak
+rozdelenie $P$ vráti pozitívny príklad s nenulovou pravdepodobnosťou,
+nie je to problém: s veľkým počtom trénovacích príkladov $t$ potom vieme
+dosiahnuť aj veľký počet pozitívnych trénovacích príkladov $t^+$.
+
+Čo ak rozdelenie $P$ pozostáva iba z negatívnych príkladov? V takom
+prípade náš algoritmus nepotrebuje žiaden príklad, hneď dosiahne OTeCh
+$100\%$. Vždy totiž vráti degenerovaný obdĺžnik, ktorý neobsahuje žiadne
+body (ani len na okraji).
+
+V dôkaze budeme riešiť už len prvý prípad.
+
 \begin{proof}
   Pod \emph{váhou} množiny budeme rozumieť pravdepodobnosť, že náhodný
   bod z rozdelenia $P$ padne do tejto množiny.
+
+  Zle klasifikované body roviny sú tie, ktoré sú vo vnútri cieľového obdĺžnika
+  $c$ ale nie sú vo vnútri nášho obdĺžnika $\hat{h}_T$. Každý z týchto zlých
+  bodov padne do aspoň jedného z pásov na okraji $c$, ako je vyobrazené
+  na obrázku \ref{rectgame:strips}.
+
+  Zlá hypotéza je taká, v ktorej je celková váha zlých bodov aspoň $\varepsilon$.
+  Kedže každý zlý bod padne do aspoň jedného z pásov, aspoň jeden z týchto pásov
+  musí mať váhu aspoň $\varepsilon/4$. To ale znamená, že ak žiaden z pásov
+  nebude mať takúto veľkú váhu, naša hypotéza bude zaručene dobrá. Inými
+  slovami, pravdepodobnosť zlej hypotézy je zhora ohraničená pravdepodobnosťou,
+  že aspoň jeden z pásov má váhu aspoň $\varepsilon/4$.
   
-  Zle klasifikované body sú práve tie, ktoré sú vo vnútri $c$ ale nie sú
-  vo vnútri $\hat{h}$. Každý z týchto bodov padne do aspoň jedného
-  z okrajových ``pásikov'' (nerátajúc jeden z okrajov), ako je
-  zobrazené na obrázku \ref{rectgame:strips}.
-  Označme $p_\larr, p_\rarr, p_\uarr, p_\darr$ postupne váhy ľavého,
-  pravého, horného, resp. dolného pásika, chyba $\hat{h}$ sa potom dá
-  zhora odhadnúť ako súčet týchto váh:
-  $$ \err(\hat{h}) \leq p_\larr + p_\rarr + p_\uarr + p_\darr. $$
+  Pozrime sa na ľubovoľný jeden konkrétny pás, BUNV ten ľavý. Aká je
+  pravdepodobnosť, že váha tohto pásu je aspoň $\varepsilon/4$? Aby sa
+  toto stalo, museli by všetky body z trénovacích príkladov padnúť
+  ďaleko od ľavého okraja. Ako presne ďaleko?
   
-  Ak by sme voľbou dostatočne veľkého $t$ vedeli zaručiť
-  (s pravdepodobnosťou aspoň $1 - \delta$), že dostaneme takú hypotézu
-  $\hat{h}$, pre ktorú je výraz na pravej strane nanajvýš $\varepsilon$,
-  vyhrali by sme.
+  Predstavme si súvislý úsek bodov od ľavého okraja, ktorého váha je
+  presne $\varepsilon/4$. Bod je dostatočne ďaleko, ak nepadne do tohto
+  úseku; ilustrujeme na obrázku \ref{rectgame:eps_strip}. Pravdepodobnosť,
+  že náhodný príklad padne takto ďaleko, je $1 - \varepsilon/4$; pravdepodobnosť,
+  že každý z $t$ náhodne vybraných trénovacích príkladov padol takto ďaleko,
+  je $(1 - \varepsilon/4)^t$.
   
-  Ukážeme, že vieme zaručiť (s pravdepodobnosťou aspoň $1 - \frac{\delta}{4}$)
-  každú zo štyroch nerovností:
-  $$ p_\larr, p_\rarr, p_\uarr, p_\darr \leq \frac{\varepsilon}{4}. $$
-  Potom pravdepodobnosť, že budú všetky štyri nerovnosti platiť súčasne,
-  bude aspoň $1 - \delta$, čo je presne to, čo chceme. Postup bude vo
-  všetkých štyroch prípadoch ten istý, ukážeme si to teda len na ľavom pásiku.
+  S touto predstavou je ale drobný technický problém: nie pre každé
+  rozdelenie $P$ platí, že vieme nájsť úsek s váhou presne $\varepsilon/4$.
+  Napríklad si predstavme rozdelenie, v ktorom s pravdepodobnosťou $50\%$
+  dostaneme bod v strede obdĺžnika, a inak si vyberieme rovnomerne náhodne
+  bod v pravej polovici. Najmenší ľavý súvislý úsek s kladnou váhou bude mať
+  hneď váhu $50\%$.
   
-  Kedy je váha ľavého pásika malá? Keď aspoň
-  jeden trénovací príklad je dostatočne blízko k ľavému okraju. Keď sa
-  na to pozrieme opačne, váha pásika je veľká, ak žiaden trénovací
-  nie je blízko.
-  Nech $\alpha$ je pravdepodobnosť toho, že trénovací príklad je blízko
-  ľavého okraju. Pravdepodobnosť, že ani jeden z trénovacích príkladov
-  nie je blízko, je potom $(1 - \alpha)^t \leq e^{-\alpha t}$. My chceme
-  zvoliť také $t$, aby pravdepodobnosť tohto zlého prípadu bola nanajvýš
-  $\frac{\delta}{4}$:
+  Musíme teda postupovať inak. Uvedomme si, že bod $x$ je dostatočne ďaleko vtedy, keď váha bodov naľavo
+  od $x$ je aspoň $\varepsilon/4$. To ale znamená, že vieme vyznačiť súvislý
+  úsek bodov pri ľavom okraji, ktorý má váhu aspoň $\varepsilon/4$ a ktorý
+  je celý naľavo od všetkých takýchto dostatočne vzdialených bodov $x$.
+  Z toho vyplýva, že váha všetkých dostatočne vzdialených bodov môže
+  byť nanajvýš $1 - \varepsilon/4$. Pravdepodobnosť, že náhodný príklad
+  padne takto ďaleko, je preto nanajvýš $1 - \varepsilon/4$; pravdepodobnosť,
+  že každý z $t$ náhodne vybraných trénovacích príkladov padol takto ďaleko,
+  je nanajvýš $(1 - \varepsilon/4)^t$. To ďalej zhora odhadneme ako $e^{-t \cdot \varepsilon/4}$.
+  
+  Tento odhad spravíme pre každý z okrajových pásov. Dostaneme tak
+  odhad na pravdepodobnosť zlej hypotézy:
+  $$ \prob_T \left( \Err(\hat{h}_T) \geq \varepsilon \right) \leq 4 \cdot e^{-\frac{t \varepsilon}{4}} $$
+
+  Ak chceme dostať zlú hypotézu iba s malou pravdepodobnosťou (nanajvýš $\delta$),
+  stačí zvoliť také $t$, že pravá strana je nanajvýš $\delta$. Odtiaľ dostaneme
+  odhad na postačujúci počet trénovacích príkladov:
   \begin{align}
-    e^{-\alpha t} &\leq \frac{\delta}{4} \\
-    -\alpha t &\leq \ln{\frac{\delta}{4}} \\
-    t &\geq \frac{1}{\alpha} \cdot \ln{\frac{4}{\delta}}
+    4 \cdot e^{-\frac{t \varepsilon}{4}} &\leq \delta \\
+    -\frac{t \varepsilon}{4} &\leq \ln \left( \frac{\delta}{4} \right) \\
+    t &\geq \frac{4}{\varepsilon} \cdot \ln \left( \frac{4}{\delta} \right)
   \end{align}
-  
-  Stačí teda zvoliť $t \geq \frac{1}{\alpha} \cdot \ln{\frac{4}{\delta}}$.
-  Pre úplnosť ešte ukážeme dolný odhad na pravdepodobnosť $\alpha$.
-  
-  Čo presne znamená byť ``dostatočne blízko'' k ľavému okraju?
-  Bod $(x, y)$ je blízko, ak váha všetkých bodov naľavo od neho je
-  nanajvýš $\frac{\varepsilon}{4}$. Inak zapísané,
-  $$ \prob_{(x',y') \sim P} (x' < x) \leq \frac{\varepsilon}{4}.$$
-  
-  Vyznačme si teda všetky takéto body. Množina týchto bodov bude tvoriť
-  súvislý úsek od ľavého okraja (ako na obrázku \ref{rectgame:eps_strip}),
-  s tým, že hranica úseku v ňej môže ale nemusí byť. Ukážeme, že váha
-  týchto bodov je aspoň $\frac{\varepsilon}{4}$, čím dostaneme odhad
-  $\alpha \geq \frac{\varepsilon}{4}$. (Nie je ťažké vidieť, že ak je
-  rozdelenie $P$ spojité, tak je táto váha dokonca presne
-  $\frac{\varepsilon}{4}$.)
   
   \begin{figure}
     \begin{subfigure}[t]{0.49\linewidth}
@@ -563,15 +545,12 @@ ho s $c$.
     \begin{subfigure}[t]{0.49\linewidth}
       \centering
       \includegraphics[scale=1]{obrazky/rectgame3.pdf}
-      \caption{Sivou farbou je vyznačená množina všetkých
-        bodov, pre ktoré má pásik naľavo od nich váhu nanajvýš
-        $\frac{\varepsilon}{4}$.}
+      \caption{Sivou farbou je vyznačený súvislý úsek bodov s váhou
+        presne $\varepsilon/4$.}
       \label{rectgame:eps_strip}
     \end{subfigure}
     \caption{Obdĺžniková hra.}
   \end{figure}
-  
-  \TODO{dôkaz (eww, grc)}
 \end{proof}
 
 
