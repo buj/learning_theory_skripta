@@ -1,4 +1,3 @@
-\chapter{Úvod do teórie strojového učenia}
 
 V oblasti teórie strojového učenia sa zaoberáme učením; formalizujeme ho,
 navrhujeme rôzne algoritmy schopné tohto učenia, analyzujeme ako rýchlo
@@ -31,11 +30,6 @@ tým lepší budeme mať obraz o tom, čo to učenie je.
 My sa v týchto skriptách budeme zaoberať hlavne oblasťou \emph{učenia s
 učiteľom}. Uvedieme hlavný model (tzv. \emph{statistical learning framework}),
 s ktorým budeme pracovať, a v prípade potreby rozširovať/dolaďovať.
-
-
-
-
-\section{Model} \label{ch1:stat_lr_fw}
 
 Predstavme si, že chceme vedieť na základe nejakých vstupných dát (ktoré
 budeme spravidla označovať $x$) predpovedať výstupné dáta (označované $y$).
@@ -82,108 +76,58 @@ Tým, že sme obmedzili množinu hypotéz, sme v podstate zaviedli
 sme odvodili výsledky aj na tých vstupoch, ktoré sme ešte nevideli.
 
 
+\section{Štatistický model učenia, základné definície a predpoklady}
+\label{ch1:stat_lr_fw}
 
-
-\section{Definície a označenia}
-
-Množinu všetkých vstupov označíme $X$, niekedy jej budeme hovoriť aj
-\emph{množina inštancii}. Množinu všetkých výstupov označíme $Y$.
-
-Množinu všetkých trénovacích príkladov budeme volať \emph{trénovacia
-množina}, označíme ju $T$. (Z matematického hľadiska to ale nie je
-množina, skôr multimnožina, kedže jedna dvojica $(x, y)$ sa medzi
-trénovacími príkladmi môže vyskytovať viackrát. Pre jednoduchosť to
-ale budeme nazývať množinou.) Počet trénovacích príkladov označíme $t$.
-
-Proces, ktorým získavame dáta $(x, y)$, vieme formalizovať ako
-pravdepodobnostné rozdelenie $P$ nad priestorom $X \times Y$, ktoré
+Množinu všetkých možných vstupov označíme $X$, niekedy jej budeme hovoriť aj
+\emph{množina inštancií}. Množinu všetkých možných výstupov označíme $Y$.
+Proces, ktorým získavame dáta $(x, y)$, vieme formalizovať pomocou
+pravdepodobnostného rozdelenie $P$ nad priestorom $X \times Y$, ktoré
 každému možnému pozorovaniu priradí nejakú pravdepodobnosť (resp. hustotu
-pravdepodobnosti v prípade spojitého rozdelenia). Trénovacie
-príklady získame ako $t$ nezávislých vzoriek z rozdelenia $P$.
+pravdepodobnosti v prípade spojitého rozdelenia).
+
+Trénovacie príklady získame ako $t$ nezávislých vzoriek z rozdelenia $P$.
+Množinu trénovacích príkladov budeme volať \emph{trénovacia
+množina} a označíme ju $T$. (Z matematického hľadiska to ale nie je
+množina, kedže jedna dvojica $(x, y)$ sa medzi
+trénovacími príkladmi môže vyskytovať viackrát. Pre jednoduchosť to
+ale budeme nazývať množinou.) 
+
+\begin{remark}[Skrátené zápisy stredných hodnôt.]
+Vzhľadom k tomu, že pravdepodobnostné rozdelenie $P$ nám bude slúžiť v tomto
+texte ako ``univerzálny'' model sveta, zápisy stredných hodnôt budeme
+zjednodušovať nasledovne:
+
+\begin{itemize}
+  \item ak sa stredná hodnota berie cez príklady z rozdelenia $P$:
+    $$ \E_{(x, y) \sim P} \equiv \E_{x, y} $$
+%  \item ak sa stredná hodnota berie cez všetky trénovacie príklady
+%    z množiny $T$:
+%    $$ \E_{(x, y) \in T} \equiv \E_{x_i, y_i} $$
+  \item ak sa stredná hodnota berie cez všetky možné trénovacie
+    množiny veľkosti $t$:
+    $$ \E_{T \in P^t} \equiv \E_T $$
+\end{itemize}
+Podobné skrátené zápisy budeme používať aj pri pravdepodobnostiach
+a pod.
+\end{remark}
 
 Postup, ktorým zostrojíme funkciu $h$, vieme formalizovať ako algoritmus $L$,
 ktorý na vstupe dostane niekoľko trénovacích príkladov
 $(x_1, y_1), \ldots, (x_t, y_t)$, a na výstupe vráti funkciu $h : X \to Y$,
-ktorú budeme volať \emph{hypotéza}. Množinu hypotéz označíme $H$.
+ktorú budeme volať \emph{hypotéza}. Táto hypotéza bude pochádzať z
+takzvanej \emph{množiny hypotéz}, ktorú označíme $H$.
 
+\subsection{Chyba hypotézy, očakávaná trénovacia a testovacia chyba}
 
-
-
-\subsection{Meranie chyby hypotézy}
-
-Ako vyjadriť mieru toho, že sa hypotéze ``dobre darí''? Spravíme tak
+Chybu hypotézy budeme vyhodnocovať
 pomocou \emph{chybovej funkcie} $\err : Y \times Y \to \R^+_0$,
-ktorej význam je nasledovný: $\err(y, y')$ vyjadruje, ako veľmi
+pričom $\err(y, y')$ vyjadruje, ako veľmi
 sa od seba líšia výstupy $y$ a $y'$.
 
-\emph{Chyba na jednom príklade.} Keď dostaneme nejaký príklad $(x, y)$,
-vieme zmerať, ako veľmi sa naša hypotéza $h$ na tomto vstupe pomýlila,
-ako $\err(h(x), y)$.
-
-\emph{Očakávaná testovacia chyba hypotézy (OTeChHyp).} Celkovú chybu našej
-hypotézy potom vieme zmerať ako očakávanú chybu na náhodne vybranom
-príklade z rozdelenia $P$. Túto chybu budeme označovať $\Err$,
-a vypočítame ju nasledovne:
-$$\Err(h, P) = \E_{(x, y) \sim P} \left[ \err(h(x), y) \right].$$
-Častokrát ale bude rozdelenie $P$ jasné z kontextu, v takom prípade
-budeme skrátene písať $\Err(h)$.
-
-\emph{Trénovacia chyba.} Niekedy nás bude zaujímať ale aj chyba,
-ktorú hypotéza nadobúda na trénovacej množine. Budeme ju tiež
-označovať $\Err$, a vypočítame ju nasledovne:
-$$\Err(h, T) = \E_{(x, y) \in T} \left[ \err(h(x), y) \right] = \frac{1}{t} \cdot \sum_{i=1}^t \err(h(x_i), y_i).$$
-Tento zápis sa dá chápať aj tak, že trénovaciu množinu interpretujeme
-ako pravdepodobnostné rozdelenie, pričom pravdepodobnosť každého príkladu
-je úmerná tomu, koľkokrát sa v množine vyskytuje. Niekedy túto chybu
-budeme zapisovať aj $\Err_T(h)$.
-
-
-
-\subsection{Meranie chyby algoritmu}
-
-Hypotéza je iba výstupom trénovacieho algoritmu, a závisí od toho, akú
-konkrétnu trénovaciu množinu dostaneme a od prípadnej náhodnosti
-samotného algoritmu. Ak by sme chceli porovnať dve rôzne algoritmy,
-na úrovni výstupných hypotéz to nevieme spraviť: pre jednu trénovaciu
-množinu môže byť lepší prvý algoritmus, pre inú množinu zas druhý.
-Môžeme ale hovoriť o tom, ako dobré budú tie algoritmy v priemere,
-ak vezmeme do úvahy všetky možné náhodné faktory.
-
-Trénovací algoritmus označíme $L$ (z anglického \emph{learner}). Jeho
-výstup na trénovacej množine $T$ označíme $L(T)$; prípadne $\hat{h}_T$,
-alebo len $\hat{h}$ ak bude z kontextu jasné, aká je trénovacia množina.
-
-\emph{Očakávaná testovacia chyba algoritmu (OTeChAlg).} Celkovú chybu
-algoritmu na $t$ trénovacích príkladoch zmeriame ako OTeChHyp, ktorú
-získame natrénovaním na náhodne zvolenej trénovacej množine veľkosti $t$.
-Túto chybu budeme opäť značiť $\Err$, vypočítame ju ako
-$$\Err(L, P)[t] = \E_{T \sim P^t} \left[ \Err(L(T), P) \right] = \E_{T \sim P^t} \left[ \Err(\hat{h}_T) \right].$$
-
-\emph{Očakávaná trénovacia chyba algoritmu (OTrChAlg).} Niekedy nás bude zaujímať aj to,
-akú môžeme očakávať trénovaciu chybu výstupnej hypotézy. Uvedomme si,
-že táto hodnota sa bude líšiť od očakávanej testovacej chyby: totiž
-výstupná hypotéza priamo závisí od trénovacej množiny $T$, ale iba
-nepriamo závisí od pravdepodobnostného rozdelenia $P$. (Ako príklad
-uvedieme algoritmus ``zapamätaj si trénovacie dáta''.) Túto chybu
-budeme značiť $\Err_T$, a vypočítame ju nasledovne:
-$$\Err_T(L, P)[t] = \E_{T \sim P^t} \left[ \Err(L(T), T) \right] = \E_{T \sim P^t} \left[ \Err_T(\hat{h}_T) \right].$$
-
-Pri oboch týchto chybách, pokiaľ bude z kontextu jasné rozdelenie $P$
-alebo počet príkladov $t$, zo zápisu ich vynecháme. Teda v najkratšej
-forme budeme OTeChAlg označovať $\Err(L)$ a OTrChAlg budeme značiť
-$\Err_T(L)$. Rozlišovať medzi chybami hypotéz/algoritmov
-a trénovacími/testovacími chybami budeme podľa kontextu (t.j. či je
-v indexe $_T$ a či je v zátvorke hypotéza $h$ alebo algoritmus $L$).
-
-
-
-\subsection{Príklady chybových funkcii}
-
-Uvedieme ešte príklady používaných chybových funkcii.
 Pri klasifikácii sa naša hypotéza vždy buď trafí, alebo netrafí do
-správnej odpovede. Neexistuje ale nejaká miera toho, ako veľmi sa netrafila,
-resp. ako blízko bola ku správnej odpovedi. Dáva teda zmysel každej správnej
-odpovedi priradiť chybu $0$, a každej nesprávnej odpovedi chybu $1$:
+správnej odpovede.  Správnej
+odpovedi priradíme chybu $0$, nesprávnej odpovedi chybu $1$:
 $$
   \err(y, y') = \left\{
     \begin{array}{ll}
@@ -193,178 +137,278 @@ $$
   \right.
   .
 $$
-Potom sa nám viacero vzorcov pre chyby zjednoduší: testovacia chyba
-hypotézy je
-$$\Err(h) = \E_{(x, y) \sim P} \left[ \err(h(x), y) \right] = \prob_{(x, y) \sim P} \left( h(x) \neq y \right),$$
-a podobne sa dá zjednodušiť aj trénovacia chyba.
 
-Pri regresii naopak takáto miera existuje, dokonca by sa dalo povedať, že
-každá takáto miera zodpovedá jednej chybovej funkcii. Bežnými voľbami sú
-kvadratická chyba $(y - y')^2$ a absolútna chyba $|y - y'|$.
+%Potom sa nám viacero vzorcov pre chyby zjednoduší: testovacia chyba
+%hypotézy je
+%$$\Err(h) = \E_{(x, y) \sim P} \left[ \err(h(x), y) \right] = \prob_{(x, y) \sim P} \left( h(x) \neq y \right),$$
+%a podobne sa dá zjednodušiť aj trénovacia chyba.
 
+Pri regresii budeme v nasledujúcom texte používať funkciu
+$\err(y,y')=(y-y')^2$ (takzvaná $L_2$ chybová funkcia), často sa používa
+aj funkcia $\err(y,y')=|y-y'|$ (takzvaná $L_1$ chybová funkcia).
 
+\emph{Chyba na jednom príklade.} Keď dostaneme nejaký príklad $(x, y)$,
+vieme zmerať, ako veľmi sa naša hypotéza $h$ na tomto vstupe pomýlila,
+ako $\err(h(x), y)$. \emph{Trénovacia chyba} je chyba,
+ktorú hypotéza nadobúda na trénovacej množine. Budeme ju
+označovať $\Err$, a vypočítame ju nasledovne:
+$$\Err_T(h) = \frac{1}{t} \cdot \sum_{i=1}^t \err(h(x_i), y_i).$$
+%Tento zápis sa dá chápať aj tak, že trénovaciu množinu interpretujeme
+%ako pravdepodobnostné rozdelenie, pričom pravdepodobnosť každého príkladu
+%je úmerná tomu, koľkokrát sa v množine vyskytuje. Niekedy túto chybu
+%budeme zapisovať aj $\Err_T(h)$.
 
-\subsection{Ďalšie označenia}
+\emph{Očakávaná testovacia chyba hypotézy} je očakávaná chyba
+na náhodne vybranom príklade z rozdelenia $P$.
+Túto chybu budeme tiež označovať $\Err$,
+a vypočítame ju nasledovne:
+$$\Err_P(h) = \E_{(x, y)\sim P} \left[ \err(h(x), y) \right].$$
+Rozdelenie $P$ bude obvykle jasné z kontextu, v takom prípade
+budeme skrátene písať $\Err(h)$.
 
-Pri zápise stredných hodnôt budeme vynechávať to, odkiaľ premenné pochádzajú,
-pokiaľ to bude z kontextu jasné. Konkrétne zavedieme nasledovné skrátené
-zápisy:
+\subsection{Predpoklady o trénovacom algoritme}
+\label{ch1:asses}
 
-\begin{itemize}
-  \item ak sa stredná hodnota berie cez príklady z rozdelenia $P$:
-    $$ \E_{(x, y) \sim P} \equiv \E_{x, y} $$
-  \item ak sa stredná hodnota berie cez všetky trénovacie príklady
-    z množiny $T$:
-    $$ \E_{(x, y) \in T} \equiv \E_{x_i, y_i} $$
-  \item ak sa stredná hodnota berie cez všetky možné trénovacie
-    množiny veľkosti $t$:
-    $$ \E_{T \in P^t} \equiv \E_T $$
-\end{itemize}
+Doteraz sme neriešili, ako má vyzerať trénovací algoritmus $L$. Vo
+všeobecnosti, takýto algoritmus dostane na vstupe trénovaciu množinu
+$T$ pozostávajúcu z $t$ trénovacích príkladov a množinu hypotéz $H$,
+ktorá charakterizuje všetky možné ``použiteľné'' hypotézy. Výstupom
+takéhoto algoritmu má byť jedna funkcia $h\in H$, ktorú nazveme
+natrénovaná hypotéza.
 
-Podobné skrátené zápisy budeme používať aj pri pravdepodobnostiach
-a pod.
+Vo všeobecnosti, uvažovať vlastnosti ľubovoľného takého algoritmu $L$
+je veľmi ťažké. Intuitívne je jasné, že hypotéza, ktorú dá algoritmus
+na výstupe, by mala určite mať malú trénovaciu chybu pre trénovaciu
+množinu $T$. Kým pre niektoré množiny hypotéz $H$ môže byť nájdenie
+takej hypotézy pomerne priamočiare (ako napríklad nájdenie funkcie
+minimalizujúcej $L_2$ trénovaciu chybu na množine všetkých lineárnych
+funkcií), v iných prípadoch to môže byť výpočtovo ťažký optimalizačný
+problém (napríklad NP-ťažký, či dokonca nevypočítateľný). Takisto,
+algoritmus $L$ môže byť deterministický (pre tú istú trénovaciu
+množinu dá vždy ten istý výsledok), no môže byť aj pravdepodobnostný
+(používa náhodné čísla a preto sa výsledok môže pri rôznych behoch
+líšiť, aj napriek tomu, že na vstupe je tá istá trénovacia
+množina).
 
+Aj keď úvahy o rôznych typoch trénovacích algoritmov sú zaujímavými
+problémami a tvoria podstatnú časť výskumu v teórii strojového učenia,
+pre jednoduchosť v tomto texte budeme od všetkých týchto problémov
+abstrahovať a budeme uvažovať jediný typ trénovacieho algoritmu:
+bude to algoritmus, ktorý nájde ``najlepšiu'' hypotézu z množiny hypotéz $H$,
+t.j. takú, ktorá minimalizuje trénovaciu chybu:
+$$\hat{h}_T = \argmin_{h \in H}\{\Err_T(h)\}. $$ Nebudeme pri tom
+uvažovať, akým spôsobom, či v akej časovej zložitosti sa to nášmu
+trénovaciemu algoritmu podarí. Takýto algoritmus sa nazýva aj
+\emph{minimalizácia empirického rizika} (empirical risk minimization, alebo ERM).
 
-
-\subsection{Diskusia o výpočtových detailoch} \label{ch1:asses}
-
-V tejto kapitole sa nebudeme zaoberať výpočtovou stránkou strojového
-učenia, takže od detailov ako časová zložitosť, spôsob hľadania
-optimálneho riešenia a pod. abstrahujeme.
-
-Namiesto konkrétneho trénovacieho algoritmu teda budeme predpokladať,
-že máme \emph{všemohúci} algoritmus: taký, ktorý nám vždy vráti tú
-hypotézu z $H$, ktorá je z ERM hľadiska najlepšia (teda má najmenšiu
-chybu na trénovacej množine). Teda
-$$ \hat{h}_T = \argmin_{h \in H} \left( \Err_T(h) \right). $$
-
-Vo všeobecnosti to nie je realistický predpoklad; nie je jednoduché
-navrhnúť efektívny algoritmus, ktorý vždy nájde hypotézu s najmenšou
-chybou. Dokonca pre niektoré dostatočne zložité množiny hypotéz $H$
-taký efektívny algoritmus ani nemusí existovať. Nájsť \emph{nejaký}
-algoritmus ale väčšinou nie je problém, len potom beží v čase $O(t!^{t!})$
-(len pre ilustráciu, nič faktické za týmto výrazom nehľadajte). Ak teda
-chceme holistický pohľad na učenie, nemôžeme len tak zanedbať časovú
-zložitosť a iné výpočtové záležitosti.
-
-
-
-
-\section{Analýza veľkostí chýb}
-
-V tejto časti sa podrobnejšie pozrieme na to, ako závisia vyššie
-uvedené metriky (t.j. OTeChAlg a OTrChAlg) od veľkosti trénovacej množiny
-$t$ a od veľkosti množiny hypotéz $H$. V celej časti budeme predpokladať,
-že úloha je regresného charakteru a chyba sa meria ako kvadratická odchýlka.
-
-
+Pre ERM algoritmus teraz vieme zadefinovať a neskôr aj
+analyzovať \emph{očakávanú trénovaciu chybu} (ďalej OTrCh)
+a \emph{očakávanú testovaciu chybu} (ďalej OTeCh).  Uvedomme si, že v
+našom modeli je trénovacia množina $T$ jednoducho množina $t$
+príkladov, ktoré sú nezávisle na sebe vyberané z pravdepodobnostnej
+distribúcie $P$. Preto $T$ možno chápať ako náhodnú premennú a v tomto
+kontexte aj funkcia $\hat{h}_T$ je náhodnou premenou. \emph{Očakávaná
+trénovacia chyba} preto bude definovaná ako nasledujúca stredná
+hodnota:
+$$\text{OTrCh} = E_T[\Err_T(\hat{h}_T)] =
+               E_{T}\left[\frac{1}{t}\sum_{(x_i,y_i)\in T}
+                \err(\hat{h}_T(x_i),y_i)\right].$$
+OTrCh teda meria, ako dobre ERM algoritmus dokáže modelovať typickú
+trénovaciu množinu. Nás však bude zaujímať najmä to, ako dobre taký
+algoritmu funguje na nových príkladoch, ktoré neboli nutne obsiahnuté
+v trénovacej množine. Preto okrem trénovacej množiny $T$ budeme uvažovať
+aj ďalší testovací príklad, takisto náhodne vybratý z pravdepodobnostnej
+distribúcie $P$. Pomocou tohto nového príkladu zadefinujeme \emph{očakávanú
+testovaciu chybu} nasledovne:
+$$\text{OTeCh} = E_T E_{x,y} [ \err(\hat{h}_T(x),y) ].$$
+Takto zadefinovaná chyba vystihuje celkovú chybu nakumulovanú v rámci
+celého učiaceho procesu: od chyby, ktorá môže vzniknúť výberom
+nereprezentatívnej trénovacej množiny $T$, cez chyby spôsobené výberom
+nevhodnej množiny hypotéz $H$, až po chyby vzniknuté pri záverečnom
+používaní natrénovanej hypotézy.
 
 \subsection{Teoretické limity}
 
-Uvedomme si, že naša hypotéza musí byť funkciou, teda pre jedno $x$
-musí vždy vracať jednu a tú istú hodnotu $y = h(x)$. Rozdelenie $P$ ale
-môže pre jedno $x$ obsahovať viaceré hodnoty $y$, pre ktoré je pravdepodobnosť
+Intuitívne by sme očakávali, že ak by sme mali dostatočne veľkú
+množinu hypotéz $H$ a pracovali by sme s dostatočne veľkým počtom
+trénovacích príkladov, tak sa nám eventuálne podarí docieliť, že OTeCh
+bude nulová. Problémom však je, že výsledkom trénovania musí byť funkcia,
+ktorá pre každú hodnotu $x\in X$ vráti jednu konkrétnu cieľovú hodnotu
+$y\in Y$.  Rozdelenie $P$ ale
+môže pre jedno $x$ pripúšťať viaceré hodnoty $y$, pre ktoré je pravdepodobnosť
 nenulová; napríklad $P$ môže reprezentovať zašumené dáta.
 
-Teda ani najlepšia možná hypotéza-funkcia (nie nutne z $H$) nemusí
-mať nulovú chybu. Označme túto hypotézu $h^\square$. Ak by sa nám
-podarilo vyjadriť jej testovaciu chybu, získali by sme akýsi ireducibilný
-komponent, ktorý má každá hypotéza; môžeme sa snažiť znížiť iba tú časť
-chyby, ktorá je ``navyše''.
-
-Z definície
-$$h^{\square} = \argmin_h \left( \Err(h) \right) = \argmin_h \left( \E_{x,y} \left[ (h(x) - y)^2 \right] \right).$$
+Teda ani najlepšia možná hypotéza-funkcia nemusí
+mať nulovú chybu. Označme takúto hypotézu $h^\square$. Ak by sa nám
+podarilo vyjadriť jej testovaciu chybu, získali by sme akýsi ireducibilný komponen chyby, ktorý má každá hypotéza; môžeme sa snažiť znížiť iba tú časť
+chyby, ktorá je oproti tomuto ``navyše''. Uvažujúc $L_2$ chybu, z definície
+$$h^{\square} = \argmin_h \{ \Err(h) \} = \argmin_h \{ \E_{x,y} \left[ (h(x) - y)^2 \right] \}.$$
 
 Chybu ľubovoľnej hypotézy $h$ vieme upraviť nasledovne:
 \begin{align}
   \Err(h)
     &= \E_{x,y} \left[ (h(x) - y)^2 \right] \\
-    &= \E_x \left[ \E_{y|x=x} \left[ (h(x) - y)^2 \right] \right].
+    &= \E_x \left[ \E_{y|x} \left[ (h(x) - y)^2 \right] \right].
 \end{align}
 
 Pozrime sa na vnútornú strednú hodnotu ($\E_{y|x}$). V nej je $x$ konštanta, a
-teda aj $h(x) = c$ je konštanta. Aká konštanta minimalizuje danú
-strednú hodnotu? Nie je ťažké vidieť (napríklad zderivovaním), že
-minimum sa nadobúda pre $c = \E_{y|x=x}[y]$. Takže
-$$h^{\square}(x) = \E_{y|x=x}[y],$$
-a testovacia chyba najlepšej hypotézy-funkcie teda je
-$$\Err(h^{\square}) = \E_{x} \left[ \E_{y|x=x} \left[ \left( y - \E[y] \right)^2 \right] \right] = \E_{x} \left[ \Var_{y|x=x}(y) \right].$$
+teda aj $h(x) = c$ je konštanta. Nie je ťažké vidieť
+(napríklad zderivovaním), že
+minimum dosiahneme pre $c = \E_{y|x}[y]$. Takže
+$$h^{\square}(x) = \E_{y|x}[y],$$
+a (ireducibilná) očakávaná testovacia chyba najlepšej možnej hypotézy teda je
+$$\Err(h^{\square}) = \E_{x} \left[ \E_{y|x} \left[ \left( y - \E[y] \right)^2 \right] \right] = \E_{x} \left[ \Var_{y|x}(y) \right].$$
 
 
+\section{Hľadanie rovnováhy medzi výchylkou a rozptylom}
 
-\subsection{Kompromis medzi výchylkou a rozptylom (bias-complexity tradeoff)}
+V tejto časti sa podrobnejšie pozrieme na to, ako závisia vyššie
+uvedené metriky (t.j. OTeCh a OTrCh) od veľkosti trénovacej množiny
+$t$ a od zložitosti množiny hypotéz $H$. V celej časti budeme predpokladať,
+že úloha je regresného charakteru a chyba sa meria pomocou funkcie $L_2$.
 
-V tomto odseku si ukážeme, ako sa dá rozložiť celková OTeChAlg na niekoľko
-komponentov. To nám dá lepší obraz o tom, čo treba spraviť, ak chceme
-znížiť OTeChAlg nášho trénovacieho algoritmu $L$ (a dosiahnuť tak lepšie výsledky).
+\subsection{Rozklad OTeCh na výchylku a rozptyl}
 
-Pripomeňme si, že náš algoritmus je všemohúci, vracia teda tú hypotézu z $H$,
-ktorá má najmenšiu chybu na trénovacej množine:
-$$ \hat{h}_T = \argmin_{h \in H} \left( \Err_T(h) \right) $$
+\newcommand{\vVychylka}{\text{výchylka}}
+\newcommand{\vRozptyl}{\text{rozptyl}}
+\newcommand{\vRozptylT}{\text{trénovací rozptyl}}
+\newcommand{\vOTrChAlg}{\text{očakávaná trénovacia chyba}}
 
-Označme $h^\star$ objektívne najlepšiu hypotézu z $H$, teda takú,
-ktorá má najmenšiu testovaciu chybu.
-$$ h^\star = \argmin_{h \in H} \left( \Err(h) \right) $$
 
-Uvedomme si, že tieto dve hypotézy sa líšia iba tým, na akom
-pravdepodobnostnom rozdelení sú optimálne. Hypotéza $\hat{h}_T$
-je optimálna na trénovacej množine, ktorá je iba konečnou aproximáciou
-skutočného rozdelenia $P$, zatiaľ čo $h^\star$ je optimálna na tomto
-skutočnom rozdelení. Platia teda nerovnosti
-\begin{align*}
-  \Err_T(\hat{h}_T) &\leq \Err_T(h^\star) \\
-  \Err(h^\star) &\leq \Err(\hat{h}_T)
-\end{align*}
+V tomto odseku si ukážeme zaujímavý výsledok, ktorý nám za určitých
+predpokladov umožňuje vyjadriť chyby pomocou iných, jasnejších veličín:
+tzv. \emph{výchylky} a \emph{rozptylu}.
+Označme najlepšiu hypotézu z množiny $H$ ako $h^\star$, teda
+$$h^\star = \argmin_{h \in H} \left( \Err(h) \right).$$
 
-Toto platí pre ľubovoľnú trénovaciu množinu $T$. Keď to teda vezmeme
-dokopy cez všetky možné $T$, dostaneme ``očakávanú'' formu týchto
-nerovností:
-\begin{align*}
-  \Err_T(L) &\leq \E_T \left[ \Err_T(h^\star) \right] \\
-  \Err(h^\star) &\leq \Err(L)
-\end{align*}
+Budeme upravovať výraz reprezentujúci OTeCh:
+\begin{align}
+  \text{OTeCh}
+    &= \E_T \left[ \Err(\hat{h}_T) \right] \\
+    &= \E_T \left[ \E_{x,y} \left[ (\hat{h}_T(x) - y)^2 \right] \right] \\
+    &= \E_T \left[ \E_{x,y} \left[ \left( (\hat{h}_T(x) - h^\star(x)) + (h^\star(x) - y) \right)^2 \right] \right]\\
+    &= \E_T \left[ \E_{x,y} \left[ (\hat{h}_T(x) - h^\star(x))^2 \right] \right]
+    + \E_T \left[ \E_{x,y} \left[ (h^\star(x) - y)^2 \right] \right] 
+\label{biasvarianceodvodenie}
+\end{align}
+Posledná rovnosť vychádza z netriviálneho \hyperref[tradeoff:tech]{technického kroku},
+ktorý si vyžaduje dodatočné predpoklady. Tieto technické detaily však prenecháme
+na kapitolu \ref{tradeoff:tech}.
+Druhý zo sčítancov sa dá ešte zjednodušiť. Kedže $h^\star$ ani $y$
+nezávisia od trénovacích dát, môžeme sa zbaviť vonkajšej strednej
+hodnoty. Dostávame tak výslednú rovnosť
+\begin{equation}
+  \text{OTeCh}
+    = \underbrace{\E_T \left[ \E_{x,y} \left[ (\hat{h}_T(x) - h^\star(x))^2 \right] \right]}_{\vRozptyl}
+    + \underbrace{\E_{x,y} \left[ (h^\star(x) - y)^2 \right]}_{\vVychylka}.
+  \label{eq:vr1}
+\end{equation}
 
-Pritom očakávaná trénovacia chyba $h^\star$ je rovnaká, ako jej očakávaná
-testovacia chyba, nakoľko $h^\star$ je nezávislé od trénovacej množiny.
-(Akokoľvek je trénovacia množina vybraná, z pohľadu $h^\star$ to vyzerá
-tak, akoby sme vybrali niekoľko náhodných príkladov z $P$.) Dostávame tak
-$$ \Err_T(L) \leq \Err(h^\star) \leq \Err(L). $$
+Prvý zo sčítancov budeme volať \emph{rozptyl} (angl. variance).
+Trénovací algoritmus
+s malým rozptylom vracia funkcie, ktoré sú blízko optima v množine $H$.
+Tým, že mu zväčšíme množinu trénovacích dát, si veľmi neprilepšíme.
+Naopak, algoritmus s veľkým rozptylom vracia funkcie ďaleko od optima,
+vieme sa teda k optimu priblížiť tým, že zväčšíme množstvo trénovacích
+dát.
 
-OTeCh nášho algoritmu sa od najlepšej možnej chyby líši o hodnotu
-$\rozptyl = \Err(L) - \vychylka$, túto hodnotu budeme volať
-\emph{rozptyl} (po anglicky \emph{estimation error}). Je spôsobený tým,
-že sme pri minimalizácii chyby neuvažovali skutočné rozdelenie $P$
-(ktoré nepoznáme), ale iba niekoľko trénovacích príkladov. To, čo je
-najlepšie v $T$, nie je nutne najlepšie v $P$. Čím väčšia je ale
-trénovacia množina, tým viac sa (pravdepodobne) podobá na skutočné
-rozdelenie $P$ a tým nižší rozptyl.
 
-Prostredný člen budeme volať \emph{výchylka} a označovať $\vychylka$
-(po anglicky \emph{approximation error}). Vyjadruje chybu, ktorá je spôsobená tým,
-že sa náš algoritmus obmedzil na nejakú konkrétnu množinu hypotéz $H$.
-Čím väčšia množina hypotéz, tým menšia výchylka: kedže $h^\star$ je
-najlepšia hypotéza v množine $H$, jej zväčšením si môžeme iba prilepšiť.
-Zložitejšia množina hypotéz sa ale ľahšie ``napasuje'' na ľubovoľné
-trénovacie dáta. To zvyšuje riziko toho, že výsledná hypotéza bude
-špecifická pre trénovacie dáta a nebude schopná generalizácie. Teda
-čím väčšia množina hypotéz, tým väčší rozptyl. (Neplatí to úplne
-v každom prípade, dajú sa skonštruovať situácie, kedy zväčšením
-množiny hypotéz sa rozptyl zachová alebo dokonca zmenší. V prirodzených
-situáciách to ale do istej miery platí.)
+Druhý zo sčítancov budeme volať \emph{výchylka} (angl. bias).
+Vyjadruje chybu, ktorá
+je spôsobená tým, že sa náš algoritmus obmedzil na nejakú konkrétnu
+množinu hypotéz $H$. Čím väčšia množina hypotéz, tým menšia výchylka
+(nakoľko $h^\star$ je najlepšia hypotéza v množine $H$, jej zväčšením
+si môžeme iba prilepšiť). Zložitejšia množina hypotéz sa ale ľahšie
+``napasuje'' na ľubovoľné trénovacie dáta. To zvyšuje riziko toho,
+že výsledná hypotéza bude špecifická pre trénovacie dáta a nebude
+schopná generalizácie. Teda čím zložitejšia množina hypotéz, tým
+väčší rozptyl.
 
-OTrCh nášho algoritmu sa od očakávanej chyby $h^\star$ na trénovacích
-dátach líši o $\rozptylT = \Err(h^\star) - \Err_T(L)$, túto hodnotu
-budeme volať \emph{trénovací rozptyl}. Na skutočnom rozdelení $P$ sa
-nám nemôže dariť lepšie, ako hypotéze $h^\star$; fakt, že na trénovacích
-dátach sa nám darí lepšie, je spôsobený tým, že to, čo je najlepšie
-v $P$, nemusí byť najlepšie v $T$. Opäť ale platí, že čím väčšia
-trénovacia množina, tým viac sa (pravdepodobne) podobá na $P$ a
-tým nižší trénovací rozptyl.
+\medskip
 
-Na základe dosiaľ uvedeného vieme graficky znázorniť, ako sa zhruba správajú
-OTeChAlg, rozptyl, výchylka, trénovací rozptyl a OTrChAlg, v závislosti od
-veľkosti trénovacej množiny (obrázok \ref{img:train}) a od zložitosti
-množiny hypotéz (obrázok \ref{img:hypo}).
+Výchylku vieme upraviť ďalej, čo nám umožní vyjadriť vzťah medzi
+OTrCh a OTeCh. Všimnime si, že hypotéza $h^\star$ ani $y$ nezávisia
+od trénovacej množiny $T$. Z ich pohľadu sú teda testovacie dáta $x, y$
+a trénovacie dáta $T=\{(x_1,y_1),(x_2,y_2),\dots,(x_t,y_t)\}$ nerozlíšiteľné.
+Takže na meranie chyby
+$h^\star$ môžeme použiť aj trénovacie dáta, berúc v úvahu ich náhodný
+výber:
+\begin{align}
+  \vVychylka
+    &= \E_T \left[ \frac{1}{t}\sum_{(x_i,y_i)\in T}  (h^\star(x_i) - y_i)^2  \right] \\
+    &= \E_T \left[ \frac{1}{t}\sum_{(x_i,y_i)\in T}  \left( (h^\star(x_i) - \hat{h}_T(x_i)) + (\hat{h}_T(x_i) - y_i) \right)^2  \right]
+\end{align}
+Použitím technického kroku obdobného k predchádzajúcemu dostaneme:
+\begin{align}
+  \vVychylka &= \underbrace{\E_T \left[ \frac{1}{t} \sum_{(x_i,y_i)\in T} (h^\star(x_i) - \hat{h}_T(x_i))^2 \right]}_\vRozptylT
+    + \underbrace{\E_T \left[ \frac{1}{t} \sum_{(x_i,y_i)\in T}  (\hat{h}_T(x_i) - y_i)^2 \right]}_{\text{OTrCh}}
+ \label{eq:vr2}
+\end{align}
+
+Prvý zo sčítancov budeme volať \emph{trénovací rozptyl}.
+Uvedomme si, že pre ľubovoľné trénovacie dáta $T$ platí
+$\Err_T(\hat{h}_T) \leq \Err_T(h^\star),$
+nakoľko $\hat{h}_T$ je optimálna hypotéza pre danú množinu trénovacích
+dát. Hypotéza $h^\star$ síce je najlepšia pre $H$, trénovacie dáta sú ale len
+malá vzorka z $H$.
+Trénovací rozptyl teda môžeme chápať ako mieru toho, akej veľkej
+chyby sa trénovací algoritmus dopustí z dôvodu toho, že dostal obmedzený
+počet trénovacích príkladov.
+\medskip
+
+Druhý zo sčítancov je OTrChAlg. Je to stredná hodnota
+chyby, ktorej sa dopustí výstup z algoritmu $\hat{h}_T$ na tých istých
+dátach, pomocou ktorých sme $\hat{h}_T$ zostrojili.
+
+\medskip
+
+Z uvedených vzťahov ľahko vidíme, že platí:
+$$ \text{OTrCh} \leq \vVychylka \leq \text{OTeCh}. $$
+Na konkrétnych trénovacích dátach ale nemusí platiť, že trénovacia
+chyba je menšia ako testovacia chyba: mohli sme si (síce s malou
+pravdepodobnosťou, ale predsa) vytiahnuť zlé trénovacie dáta, na
+ktorých sa žiadnej hypotéze z $H$ nedarí. Hlbšie dôsledky rozkladov
+(\ref{eq:vr1}) a (\ref{eq:vr2}) si rozoberieme v kapitole \ref{krivky}.
+
+\begin{remark}
+Význam pojmov výchylka a rozptyl, tak ako sme ich používali v tejto
+kapitole, sa odlišuje od toho, ako sa tieto pojmy používajú v
+štatistike.  Slovo výchylka tu používame v zmysle ``časť chyby, ktorá
+je ireducibilná vzhľadom ku danej množine hypotéz'' a časť komunity ho
+volá aj \emph{chyba aproximácie} (angl. \emph{approximation error}),
+aby sa predišlo zámene s rovnako nazvaným štatistickým
+pojmom. Podobne, slovo rozptyl tu používame ako ``časť chyby, ktorá
+vyplýva z nedokonalého trénovacieho algorimu (konkrétne ERM na fixnom
+počte trénovacích príkladov)'' a zvykne sa nazýbať aj \emph{chyba
+odhadu} (angl. \emph{estimation error}).  Výsledok prezentovaný ako
+rovnica (\ref{eq:vr1}) tak môžeme nájsť aj pod názvom \emph{rozklad
+na chybu aproximácie a chybu odhadu} (angl. \emph{approximation--estimation
+error decomposition} resp. \emph{trade-off between approximation and
+decomposition error}.)
+
+Napriek tomu sa tvrdenie (\ref{eq:vr1}) a (\ref{eq:vr2}) a pojmy
+zadefinované ako výchylka a rozptyl v tejto kapitole bežne používajú
+v kontexte záverov prezentovaných v kapitole \ref{krivky}, preto sa
+aj tu pridŕžame tejto interpretácie a mierne nešťastnej terminológie.
+Na druhej strane, existuje
+aj rozklad OTeCh na výchylku a rozptyl v štatistickom slova zmysle;
+tento výsledok, ako aj jeho dôsledky, si zbežne ukážeme v kapitole
+\ref{biasvariance2}, tento výsledok nám však neumožňuje odvodiť závery
+prezentované v kapitole \ref{krivky}.
+\end{remark}
+
+\input{cast1-technicke-detaily.tex}
+
+\subsection{Krivky učenia, podučenie a preučenie}
+\label{krivky}
+
+Na základe vzťahov (\ref{eq:vr1}) a (\ref{eq:vr2})
+vieme graficky znázorniť, ako sa zhruba správajú
+OTeCh, rozptyl, výchylka, trénovací rozptyl a OTrCh v závislosti
+od veľkosti trénovacej množiny (obrázok \ref{img:train}) a od zložitosti
+množiny hypotéz (obrázok \ref{img:hypo}). Tieto obrázky sa nazývajú
+aj \emph{krivky učenia}.
+
 
 \begin{figure}
   \centering
@@ -380,21 +424,31 @@ množiny hypotéz (obrázok \ref{img:hypo}).
   \label{img:hypo}
 \end{figure}
 
+Obrázok \ref{img:train} vychádza z toho, že ak zvyšujeme počet
+trénovacích príkladov, tak trénovací rozptyl aj rozptyl sa budú
+znižovať (všimnite si, že výchylka závisí len od zložitosti množiny
+hypotéz, ale nie od počtu trénovacích príkladov). Na základe vzťahu
+(\ref{eq:vr2}) vieme teda povedať, že OTeCh sa bude so zvyšujúcim
+počtom trénovacích príkladov približovať k výchylke zhora, kým OTrCh
+sa bude postupne približovať k výchylke zdola. Preto pri fixnej
+množine hypotéz nie je najzaujímavejším faktorom absolútna trénovacia
+či testovacia chyba (ktorá obsahuje aj výchylku, ktorá je pri fixnej
+množine hypotéz ireducibilná), ale rozdiel medzi trénovacou a
+testovacou chybou.
 
-
-
-\input{bias_variance_vinko.tex}
-
-
-
-
-\section{Podučenie/preučenie}
-
-Ak máme fixné trénovacie dáta $T$, pri voľbe množiny hypotéz $H$ sa snažíme
-nájsť kompromis medzi malým rozptylom a malou výchylkou. Zložité $H$
-bude mať malú výchylku ale veľký rozptyl, čo vedie k tzv. \emph{preučeniu}
-(angl. \emph{overfitting}). Jednoduché $H$ bude mať malý rozptyl, ale
-veľkú výchylku, tzv. \emph{podučenie} (angl. \emph{underfitting}).
+Obrázok \ref{img:hypo} ilustruje situácie, ak máme fixné trénovacie
+dáta $T$ a môžeme meniť zložitosť množiny hypotéz $H$.  Obrázok
+demonštruje, že kľúčom ku dobre vyladenému modelu je nájdenie
+rovnováhy medzi výchylkou a rozptylom (angl. \emph{bias-variance tradeoff}),
+ktoré dohromady dávajú
+testovaciu chybu.  Zložité $H$ bude mať malú výchylku ale veľký
+rozptyl, čo vedie k tzv. \emph{preučeniu} (angl. \emph{overfitting}. V
+takom prípade je potrebné zvýšiť množstvo trénovacích príkladov alebo
+zjednodušiť množinu hypotéz. Jednoduché $H$ bude mať malý rozptyl, ale
+veľkú výchylku a nastane tzv. \emph{podučenie}
+(angl. \emph{underfitting}). V takom prípade nám zvýšenie počtu
+trénovacích príkladov nepomôže, dominujúcim faktorom v testovacej
+chybe je totiž malá reprezentačná sila množiny hypotéz $H$.
 
 Na obrázku \ref{img:fitting} ilustrujeme oba koncepty. Úlohou je modelovať
 kvadratickú funkciu, ku ktorej sme pridali malé množstvo šumu. Rozdelenie
@@ -424,7 +478,6 @@ dáta (nízka trénovacia chyba), avšak mimo nich bude dávať výsledky úplne
   \caption{Podučenie, preučenie, akurát.}
   \label{img:fitting}
 \end{figure}
-
 
 
 \subsection{Regularizácia}
@@ -490,8 +543,6 @@ $$h(x) = a_1x_1 + a_2x_2 + \ldots + a_nx_n.$$
     tie členy, ktoré majú nulový koeficient.
 \end{itemize}
 
-
-
 \subsection{Holdout testing}
 
 V tomto prístupe si rozdelíme dostupné dáta na dve časti:
@@ -541,7 +592,7 @@ chybu výslednej hypotézy.
 
 
 
-\section{Cvičenia}
+\subsection{Cvičenia}
 
 V nasledujúcich dvoch cvičeniach môžete predpokladať, že trénovací
 algoritmus vždy vráti nejakú funkciu (nemusí byť len jedna)
@@ -602,10 +653,8 @@ s minimálnou chybou na trénovacích dátach.
   priamočiaro získať pre $L_1$ regularizáciu.
 \end{exercise}
 
-
-
-
-\section{Appendix: iný kompromis medzi inou výchylkou a iným rozptylom}
+\subsection{*** Rozklad na výchylku a rozptyl (ako štatistické pojmy)}
+\label{biasvariance2}
 
 V literatúre pod názvom \emph{bias-variance tradeoff} vystupuje odlišný
 výsledok, ako vyššie spomenutý bias-complexity tradeoff. Uvádzame ho,
@@ -697,4 +746,3 @@ ktorú sú rozptyl aj výchylka-na-druhú nulové).
 
 
 
-\input{cast1-technicke-detaily.tex}

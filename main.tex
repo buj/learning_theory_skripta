@@ -1,4 +1,4 @@
-\documentclass[a4paper,11pt,oneside]{book}
+\documentclass[a4paper,11pt]{article}
 
 % slovenske pisanie
 \usepackage[utf8]{inputenc}
@@ -6,7 +6,7 @@
 \usepackage[slovak]{babel}
 
 % appendixy na konci kazdej kapitoly
-\usepackage{appendix}
+%\usepackage{appendix}
 \usepackage{chngcntr}
 \usepackage{etoolbox}
   
@@ -33,16 +33,16 @@
 
 \usepackage{amsthm}
 \theoremstyle{plain}
-\newtheorem{theorem}{Veta}[chapter]
-\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{theorem}{Veta}
+\newtheorem{lemma}[theorem]{Lema}
 \newtheorem{proposition}[theorem]{Tvrdenie}
 \newtheorem{corollary}[theorem]{Dôsledok}
 \theoremstyle{remark}
-\newtheorem{remark}{Poznámka}[chapter]
+\newtheorem{remark}{Poznámka}
 \theoremstyle{definition}
 \newtheorem{definition}{Definícia}
 \newtheorem{assumption}{Predpoklad}
-\newtheorem{exercise}{}[chapter]
+\newtheorem{exercise}{}
 
 \usepackage{xcolor} % \color
 \usepackage{graphicx} % obrazky
@@ -59,8 +59,9 @@
 \newcommand{\C}{\mathbb{C}}
 
 \DeclareMathOperator*{\argmin}{{arg\,min}}
-\DeclareMathOperator*{\prob}{\mathrm{Pr}}
-\DeclareMathOperator*{\E}{\mathrm{E}}
+\DeclareMathOperator*{\prob}{\textstyle\mathrm{Pr}}
+%\DeclareMathOperator*{\E}{\mathrm{E}}
+\def\E{\mathrm{E}}
 \DeclareMathOperator*{\Var}{\mathrm{Var}}
 \DeclareMathOperator*{\Cov}{\mathrm{Cov}}
 
@@ -76,6 +77,11 @@
 
 
 \begin{document}
+
+\title{Základy teórie strojového učenia}
+\author{Bui Truc Lam \and Tomáš Vinař}
+\date{Fakulta matematiky, fyziky a informatiky Univerzity Komenského v Bratislave, Mlynská dolina, 842 48 Bratislava}
+\maketitle
   
   \tableofcontents
   \newpage

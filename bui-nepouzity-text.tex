@@ -1,0 +1,73 @@
+\subsection{Kompromis medzi výchylkou a rozptylom (bias-complexity tradeoff)}
+
+V tomto odseku si ukážeme, ako sa dá rozložiť celková OTeChAlg na niekoľko
+komponentov. To nám dá lepší obraz o tom, čo treba spraviť, ak chceme
+znížiť OTeChAlg nášho trénovacieho algoritmu $L$ (a dosiahnuť tak lepšie výsledky).
+
+Pripomeňme si, že náš algoritmus je všemohúci, vracia teda tú hypotézu z $H$,
+ktorá má najmenšiu chybu na trénovacej množine:
+$$ \hat{h}_T = \argmin_{h \in H} \left( \Err_T(h) \right) $$
+
+Označme $h^\star$ objektívne najlepšiu hypotézu z $H$, teda takú,
+ktorá má najmenšiu testovaciu chybu.
+$$ h^\star = \argmin_{h \in H} \left( \Err(h) \right) $$
+
+Uvedomme si, že tieto dve hypotézy sa líšia iba tým, na akom
+pravdepodobnostnom rozdelení sú optimálne. Hypotéza $\hat{h}_T$
+je optimálna na trénovacej množine, ktorá je iba konečnou aproximáciou
+skutočného rozdelenia $P$, zatiaľ čo $h^\star$ je optimálna na tomto
+skutočnom rozdelení. Platia teda nerovnosti
+\begin{align*}
+  \Err_T(\hat{h}_T) &\leq \Err_T(h^\star) \\
+  \Err(h^\star) &\leq \Err(\hat{h}_T)
+\end{align*}
+
+Toto platí pre ľubovoľnú trénovaciu množinu $T$. Keď to teda vezmeme
+dokopy cez všetky možné $T$, dostaneme ``očakávanú'' formu týchto
+nerovností:
+\begin{align*}
+  \Err_T(L) &\leq \E_T \left[ \Err_T(h^\star) \right] \\
+  \Err(h^\star) &\leq \Err(L)
+\end{align*}
+
+Pritom očakávaná trénovacia chyba $h^\star$ je rovnaká, ako jej očakávaná
+testovacia chyba, nakoľko $h^\star$ je nezávislé od trénovacej množiny.
+(Akokoľvek je trénovacia množina vybraná, z pohľadu $h^\star$ to vyzerá
+tak, akoby sme vybrali niekoľko náhodných príkladov z $P$.) Dostávame tak
+$$ \Err_T(L) \leq \Err(h^\star) \leq \Err(L). $$
+
+OTeCh nášho algoritmu sa od najlepšej možnej chyby líši o hodnotu
+$\rozptyl = \Err(L) - \vychylka$, túto hodnotu budeme volať
+\emph{rozptyl} (po anglicky \emph{estimation error}). Je spôsobený tým,
+že sme pri minimalizácii chyby neuvažovali skutočné rozdelenie $P$
+(ktoré nepoznáme), ale iba niekoľko trénovacích príkladov. To, čo je
+najlepšie v $T$, nie je nutne najlepšie v $P$. Čím väčšia je ale
+trénovacia množina, tým viac sa (pravdepodobne) podobá na skutočné
+rozdelenie $P$ a tým nižší rozptyl.
+
+Prostredný člen budeme volať \emph{výchylka} a označovať $\vychylka$
+(po anglicky \emph{approximation error}). Vyjadruje chybu, ktorá je spôsobená tým,
+že sa náš algoritmus obmedzil na nejakú konkrétnu množinu hypotéz $H$.
+Čím väčšia množina hypotéz, tým menšia výchylka: kedže $h^\star$ je
+najlepšia hypotéza v množine $H$, jej zväčšením si môžeme iba prilepšiť.
+Zložitejšia množina hypotéz sa ale ľahšie ``napasuje'' na ľubovoľné
+trénovacie dáta. To zvyšuje riziko toho, že výsledná hypotéza bude
+špecifická pre trénovacie dáta a nebude schopná generalizácie. Teda
+čím väčšia množina hypotéz, tým väčší rozptyl. (Neplatí to úplne
+v každom prípade, dajú sa skonštruovať situácie, kedy zväčšením
+množiny hypotéz sa rozptyl zachová alebo dokonca zmenší. V prirodzených
+situáciách to ale do istej miery platí.)
+
+OTrCh nášho algoritmu sa od očakávanej chyby $h^\star$ na trénovacích
+dátach líši o $\rozptylT = \Err(h^\star) - \Err_T(L)$, túto hodnotu
+budeme volať \emph{trénovací rozptyl}. Na skutočnom rozdelení $P$ sa
+nám nemôže dariť lepšie, ako hypotéze $h^\star$; fakt, že na trénovacích
+dátach sa nám darí lepšie, je spôsobený tým, že to, čo je najlepšie
+v $P$, nemusí byť najlepšie v $T$. Opäť ale platí, že čím väčšia
+trénovacia množina, tým viac sa (pravdepodobne) podobá na $P$ a
+tým nižší trénovací rozptyl.
+
+Na základe dosiaľ uvedeného vieme graficky znázorniť, ako sa zhruba správajú
+OTeChAlg, rozptyl, výchylka, trénovací rozptyl a OTrChAlg, v závislosti od
+veľkosti trénovacej množiny (obrázok \ref{img:train}) a od zložitosti
+množiny hypotéz (obrázok \ref{img:hypo}).

@@ -1,4 +1,4 @@
-\section{Appendix: technické detaily k bias-variance tradeoff}
+\subsection{*** Technické detaily}
 \label{tradeoff:tech}
 
 \def\dist{\text{dist}}
@@ -7,7 +7,7 @@ V tejto časti dokážeme tvrdenie, ktoré sme použili pri odvodení vzťahu
 (\ref{biasvarianceodvodenie}).
 
 Pripomeňme si, že $h^{\square}(x)$ je cieľová funkcia, ktorá je
-definovaná ako $h^{\square}(x)=\E_{y|x=x}[y]$ a táto cieľová funkcia
+definovaná ako $h^{\square}(x)=\E_{y|x}[y]$ a táto cieľová funkcia
 nemusí byť súčasťou triedy hypotéz $H$.
 Funkcia $h^\star(x)$ je taká funkcia z $H$, ktorá má najmenšiu možnú
 očakávanú chybu, t.j. $h^\star = \argmin_{h\in H} \left(
@@ -25,10 +25,10 @@ $h^\square$ pomocou nasledujúcej lemy.
 \begin{eqnarray*}
   \E_{x,y}[(h(x)-y)^2] & = & \E_{x,y}[((h(x)-h^{\square}(x))+(h^{\square}(x)-y))^2]\\
   & = & \E_{x,y}[\underbrace{(h(x)-h^{\square}(x))^2}_{\text{nezávisí od $y$}}] + \E_{x,y}[(h^{\square}(x)-y)^2]\\ && + 2\E_{x,y}[((h(x)-h^{\square}(x)(h^{\square}(x)-y))]\\
-    & = & \E_x[(h(x)-h^{\square}(x))^2] + \E_{x,y}[(h^{\square}(x)-y)^2]\\&&+ 2\E_x[(h(x)-h^{\square}(x))(h^{\square}(x)-\E_{y|x=x}[y])]
+    & = & \E_x[(h(x)-h^{\square}(x))^2] + \E_{x,y}[(h^{\square}(x)-y)^2]\\&&+ 2\E_x[(h(x)-h^{\square}(x))(h^{\square}(x)-\E_{y|x}[y])]
 \end{eqnarray*}
 Druhý sčítanec je konštanta vzhľadom na $h$, preto ho pri hľadaní
-minima nemusíme uvažovať. Z definície $h^{\square}(x)=\E_{y|x=x}[y]$, preto tretí
+minima nemusíme uvažovať. Z definície $h^{\square}(x)=\E_{y|x}[y]$, preto tretí
 sčítanec bude nulový. Zostáva nám teda:
 $$h^\star=\argmin_{h\in H} \left(\E_{x}[(h(x)-h^\square(x))^2] \right),$$
 čo bolo treba dokázať.
@@ -104,9 +104,9 @@ Platí:
 &=& \E_{x,y} [ \underbrace{(\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - h^{\square}(x))}_{\text{nezávisí od $y$}}]\\
 &&+ \E_{x,y} [ (\hat{h}_T(x) - h^\star(x)) \cdot (h^{\square}(x) - y)]\\
 &=& \E_x [ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - h^{\square}(x)) ]\\
-&&+ \E_x [ (\hat{h}_T(x) - h^\star(x)) \cdot (h^{\square}(x) - \E_{y|x=x}[y]) ].
+&&+ \E_x [ (\hat{h}_T(x) - h^\star(x)) \cdot (h^{\square}(x) - \E_{y|x}[y]) ].
 \end{eqnarray*}
-Keďže z definície $h^{\square}(x) = \E_{y|x=x}[y]$, druhý sčítanec sa vynuluje a
+Keďže z definície $h^{\square}(x) = \E_{y|x}[y]$, druhý sčítanec sa vynuluje a
 dostávame:
 \begin{eqnarray*}
   \E_{x, y} \left[ (\hat{h}_T(x) - h^\star(x)) \cdot (h^\star(x) - y) \right] &=&

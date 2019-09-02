@@ -1,4 +1,4 @@
-\chapter{PAC učenie}
+\section{PAC učenie}
 
 V tejto kapitole sa budeme zaoberať otázkou toho, ako závisí chyba
 algoritmu od veľkosti trénovacej množiny. Konkrétne sa budeme
@@ -35,7 +35,7 @@ veľkosti tejto záruky, takže hranica $\delta$ je potrebná.
 
 
 
-\section{Definície, označenia a predpoklady}
+\subsection{Definície, označenia a predpoklady}
 
 Hypotézu $h$ nazveme \emph{zlou}, ak jej OTeCh je väčšia ako $\varepsilon$.
 Inak ju nazveme \emph{dobrou}. Tieto pojmy budeme používať tak, aby bola
@@ -101,7 +101,7 @@ budeme hovoriť o PAC$\triangle$ naučiteľnosti.
 
 
 
-\section{Konečné množiny hypotéz}
+\subsection{Konečné množiny hypotéz}
 
 V tejto časti sa zameriame na konečné množiny hypotéz. Uvedieme
 niekoľko príkladov takých množín: logické formuly obmedzenej
@@ -111,7 +111,7 @@ malé hypotézy.
 
 
 
-\subsection{Konečné množiny sú PAC$\star$ naučiteľné}
+\subsubsection{Konečné množiny sú PAC$\star$ naučiteľné}
 
 \begin{theorem} \label{thm:badhypobound}
   Pomocou počtu trénovacích príkladov $t$ vieme zhora odhadnúť
@@ -197,7 +197,7 @@ na $t$ také, aby boli hranice $\varepsilon$ a $\delta$ dostatočne malé.
 
 
 
-\subsection{Problém konjunkcie}
+\subsubsection{Problém konjunkcie}
 
 Máme $n$ boolovských premenných. Množinou inštancii $X$ sú všetky
 možné ohodnotenia týchto premenných, napríklad pre $n = 3$ je jedným
@@ -413,7 +413,7 @@ Dolný odhad zodpovedajúci dôsledku \ref{cor:mconj_de} uvedieme bez dôkazu.
 
 
 
-\section{Nekonečné množiny hypotéz}
+\subsection{Nekonečné množiny hypotéz}
 
 Vyššie uvedené postupy pre konečné množiny hypotéz zlyhajú, ak
 $|H| = \infty$. Aj pre nekonečné množiny hypotéz je ale možné
@@ -425,7 +425,7 @@ na jednoduchý príklad.
 
 
 
-\subsection{Obdĺžniková hra}
+\subsubsection{Obdĺžniková hra}
 
 Množinou inštancii sú všetky body roviny a množinou hypotéz sú všetky
 obdĺžniky, ktorých strany sú rovnobežné so súradnicovými osami. Obdĺžnik
@@ -559,7 +559,7 @@ V dôkaze budeme riešiť už len prvý prípad.
 
 
 
-\subsection{Vapnik-Chervonenkisova dimenzia}
+\subsubsection{Vapnik-Chervonenkisova dimenzia}
 
 Vapnik-Chervonenkisova dimenzia (alebo skrátene VC dimenzia) je miera
 zložitosti množiny hypotéz, pomocou ktorej sme schopní tvoriť tvrdenia
@@ -743,6 +743,6 @@ negatívne. Takže VC dimenzia je $4$.
 
 
 
-\begin{subappendices}
-  \input{cast2-vc-dim-dokaz.tex}
-\end{subappendices}
+%\begin{subappendices}
+%  \input{cast2-vc-dim-dokaz.tex}
+%\end{subappendices}
