@@ -576,7 +576,9 @@ pojmov.
 Inými slovami, množina $S$ je rozbitá množinou hypotéz $H$, ak sa hypotézy
 z tejto množiny vedia správať na vstupoch $S$ akokoľvek; všetkých $2^{|S|}$
 možných označení je konzistentných s niektorou hypotézou v $H$. Takéto
-označenia budeme nazývať \emph{realizovateľné}.
+označenia budeme nazývať \emph{realizovateľné}. Pre stručnosť budeme
+realizovateľné označenia nazývať aj \emph{správania}. Počet správaní
+označíme $\Pi_H(S)$.
 
 \begin{definition}
   Vapnik-Chervonenkisova dimenzia množiny hypotéz $H$, označovaná
@@ -589,25 +591,232 @@ VC dimenziu označovať $d$.
 
 Od miery zložitosti očakávame isté intuitívne vlastnosti, napríklad že
 zväčšením množiny hypotéz sa môže zložitosť iba zvýšiť. Toto skutočne
-platí pre VC dimenziu.
+platí pre VC dimenziu. Totiž ak máme množiny hypotéz $H \supseteq H'$,
+tak každé označenie realizovateľné množinou $H'$ je realizovateľné aj
+množinou $H$. Potom nutne $\Pi_H(S) \geq \Pi_{H'}(S)$, takže ak $S$
+je rozbitá množinou $H'$, musí byť rozbitá aj množinou $H$.
+
+
+
+\subsubsection{*** Súvis s PAC naučiteľnosťou}
+
+Na prvý pohľad sa môže zdať, že VC dimenzia je celkom neprirodzená miera
+zložitosti. Ako súvisí nejaká rozbiteľná množina s tým, či sa vieme danú
+množinu hypotéz $H$ naučiť?
+
+Treba sa na to pozerať z opačného uhla: ak $\VC(H) = d$, tak na 
+dostatočne veľkých množinách vstupov $S$ (s aspoň $d + 1$ prvkami) je 
+zaručené, že nevieme realizovať všetky označenia. Aspoň jedno z tých
+$2^{|S|}$ označení teda nevieme realizovať. To nám dáva nejakú informáciu:
+predstavme si vykonštruovanú situáciu, kedy vieme realizovať iba označenia
+s nepárne veľa pozitívnymi príkladmi. Potom ak uvidíme $|S| - 1$ vstupov,
+tak na $100\%$ vieme správnu odpoveď na poslednom vstupe.
+
+Označme $\Pi_H(m)$ najväčší počet označení realizovateľných množinou
+hypotéz $H$ na nejakej množine vstupov veľkosti $m$. Formálne,
+$$ \Pi_H(m) = \max_S \{ \Pi_H(S); |S| = m \}. $$
+
+Túto funkciu môžeme tiež chápať ako mieru zložitosti množiny $H$: čím
+rýchlejšie táto funkcia rastie, tým zložitejšia je $H$. Ako súvisí táto
+miera zložitosti s VC dimenziou? Zrejme ak $d = \infty$, tak $\Pi_H(m) = 2^m$
+pre každé $m$, kedže vieme rozbiť ľubovoľne veľké množiny. Čo ale ak je $d$ 
+konečné? Naivne by sme mohli očakávať, že síce $\Pi_H$ od určitého 
+momentu nemôže byť $2^m$, stále ale môže rásť veľmi rýchlo, napríklad 
+$(3/2)^m$ alebo $2^m - 7$. Ukazuje sa ale, že v tomto prípade bude rásť 
+iba ako polynóm stupňa $d$, teda že $\Pi_H(m) = O(m^d)$. Inými slovami,
+v závislosti od toho, či je VC dimenzia konečná alebo nie, bude $\Pi_H$
+od určitého momentu rásť polynomiálne, alebo bude navždy rásť exponenciálne.
+Ďalej sa budeme venovať práve dôkazu tohto tvrdenia.
+
+
+\paragraph{Polynomiálny odhad na počet správaní.}
+
+Označme $\Phi_d(m)$ najväčší počet označení, ktoré môžu byť realizované
+nejakou množinou hypotéz $H$, s $\VC(H) = d$, na množine vstupov veľkosti $m$.
+Formálne,
+$$ \Phi_d(m) = \max_H \{ \Pi_H(m); \VC(H) = d \}. $$
+
+Môžeme to chápať aj ako tesný horný odhad na každé $\Pi_H(m)$ s danou
+VC dimenziou.
 
 \begin{theorem}
-  Nech pre množiny hypotéz $H$ a $H'$ platí $H \supseteq H'$. Potom
-  $\VC(H) \succeq VC(H')$, kde $\succeq$ je relácia $\geq$ prirodzene
-  rozšírená na $\N \cup \{ \infty \}$).
+  Platí $\Pi_H(m) \leq \Phi_d(m-1) + \Phi_{d-1}(m-1)$.
 \end{theorem}
 \begin{proof}
-  Množina $S$ sa dá rozbiť pomocou $H'$ vtedy, keď každé označenie je
-  realizovateľné niektorou hypotézou v $H'$. Pretože každá hypotéza v
-  $H'$ je aj v $H$, je každé označenie realizovateľné aj pomocou $H$.
+  Nech $x \in S$ je ľubovoľný vstup. Každé správanie na $S$ je \emph{rozšírením}
+  nejakého správania na $S - \{x\}$. Z toho vyplýva triviálny odhad
+  $\Pi_H(S) \geq \Pi_H(S - \{x\})$; my chceme ale horný odhad na $\Pi_H(S)$.
+  Pozrime sa na vec podrobnejšie.
+  
+  Zoberme si nejaké správanie na $S - \{x\}$. Ako z neho dostaneme
+  správanie na $S$? Jednoducho určíme, aké označenie má mať vstup $x$.
+  Nemôžeme si to určiť ale vždy ľubovoľne, lebo výsledok by nemusel
+  byť realizovateľný. Vo všeobecnosti, vždy aspoň jedna a najviac dve
+  voľby vedú k realizovateľnému označeniu. Označme počet správaní
+  s jedným rozšírením ako $p_1$ a počet správaní s dvomi rozšíreniami
+  ako $p_2$. Potom
+  $$ \Pi_H(S) = p_1 + 2 \cdot p_2. $$
+  Pritom zrejme $p_1 + p_2 = \Pi_H(S - \{x\})$, takže dostávame
+  $$ \Pi_H(S) = \Pi_H(S - \{x\}) + p_2. $$
+  
+  Otázka teda je, koľko je $p_2$? Každé správanie zahrnuté v $p_2$ 
+  môžeme chápať ako hypotézu nad množinou inštancii $S - \{x\}$; 
+  množinu takýchto hypotéz označme $H'$. Zrejme $p_2 = |H'|$; čo je ale 
+  zaujímavejšie je, že $p_2 = \Pi_{H'}(S - \{x\})$, kedže hypotézy v 
+  $H'$ zodpovedajú (nie nutne všetkým) rôznym správaniam množiny $H$
+  na vstupoch $S - \{x\}$. Z toho vieme dostať nasledovný horný odhad
+  na $p_2$:
+  $$ p_2 \leq \Phi_{d'}(m - 1), $$
+  kde $d'$ je VC dimenzia množiny $H'$. Otázka teda je, koľko je $d'$,
+  teda akú najväčšiu podmnožinu $S - \{x\}$ vieme rozbiť?
+  
+  Uvedomme si, že každá hypotéza v $H'$ je zúžením nejakej hypotézy
+  v $H$. Dokonca je to také zúženie, že ho vieme ľubovoľne rozšíriť
+  na vstupe $x$ a stále dostaneme niečo, čo je realizovateľné, t.j.
+  zodpovedá nejakej hypotéze v $H$. Potom ak $H'$ vie realizovať
+  každé označenie nejakej množiny $S' \subseteq S - \{x\}$, tak $H$
+  vie realizovať každé označenie $S' \cup \{x\}$. Ale $H$ nevie
+  rozbiť žiadnu viac-ako-$d$-prvkovú množinu, odkiaľ plynie
+  odhad $d' \leq d - 1$.
+  
+  Máme teda $p_2 \leq \Phi_{d-1}(m - 1)$. Keď to celé poskladáme dokopy,
+  $$ \Pi_H(S) = \Pi_H(S - \{x\}) + p_2 \leq \Phi_d(m - 1) + \Phi_{d-1}(m - 1). $$
 \end{proof}
 
+Uvedená veta platí pre ľubovoľné $H$ s $\VC(H) = d$, takže odhad sa
+presunie aj na $\Phi_d(m)$.
 
-\subsubsection{Súvis s PAC naučiteľnosťou}
+\begin{theorem}
+  Platí $\Phi_d(m) \leq \Phi_d(m-1) + \Phi_{d-1}(m-1)$.
+\end{theorem}
 
-Konkrétny súvis medzi VC dimenziou a PAC naučiteľnosťou (a dôkazy týchto
-vzťahov) zatiaľ vynecháme, uvedieme tu iba znenia viet. Pre záujemcov
-odporúčame sekciu \hyperref[vcdim:proof]{appendix}.
+Odtiaľ už vieme dostať nasledovný horný odhad na $\Phi_d(m)$.
+
+\begin{theorem}
+  Platí $\Phi_d(m) \leq \sum_{i=0}^d {m \choose i}$.
+\end{theorem}
+\begin{proof}
+  Indukciou. Bázu indukcie tvoria prípady, kedy je buď $d = 0$ alebo $m = 0$;
+  zrejme platí $\Phi_0(m) = \Phi_d(0) = 1$ a ľahko overíme, že tvrdenie
+  v tomto prípade platí.
+  
+  Indukčný krok:
+  \begin{align}
+    \Phi_d(m)
+      &\leq \Phi_d(m - 1) + \Phi_{d-1}(m - 1) \\
+      &\leq \sum_{i=0}^d {{m - 1} \choose i} + \sum_{i=0}^{d-1} {{m - 1} \choose i} \label{phi:2} \\
+      &\leq \sum_{i=0}^d \left[ {{m - 1} \choose i} + {{m - 1} \choose {i - 1}} \right] \label{phi:3} \\
+      &\leq \sum_{i=0}^d {m \choose i}
+  \end{align}
+  Robili sme len ekvivalentné úpravy na pravej strane; v kroku \ref{phi:2}
+  sme využili indukčný predpoklad a v kroku \ref{phi:3} (štandardne) definujeme
+  ${{m - 1} \choose -1} = 0$.
+\end{proof}
+
+Z toho už ľahko dostaneme polynomiálny odhad (pre pevné $d$). Totiž,
+$$ {m \choose i} = \frac{m \cdot (m - 1) \cdot \ldots \cdot (m - i + 1)}{i!}, $$
+vidíme teda, že pre pevné $i$ platí ${m \choose i} = O(m^i)$. Funkcia
+$\Phi_d(m)$ je súčtom $d$ konštantne veľa takýchto členov (nakoľko $d$ je
+konštanta), teda ho vieme zhora asymptoticky odhadnúť ako ten člen, ktorý
+rastie najrýchlejšie. Tým je ${m \choose d}$, takže $\Phi_d(m) = O(m^d)$.
+
+Nás bude ale zaujímať aj rýchlosť rastu v závislosti od $d$, potrebujeme
+teda lepší odhad. Pre $m \leq d$ platí $\Phi_d(m) = 2^m$. Pre $m > d$,
+kedže $0 \leq d/m \leq 1$, môžme písať
+$$
+  \left( \frac{d}{m} \right)^d \sum_{i=0}^d {m \choose i}
+    \leq \sum_{i=0}^d \left( \frac{d}{m} \right)^i {m \choose i}
+    \leq \sum_{i=0}^m \left( \frac{d}{m} \right)^i {m \choose i}
+    = \left( 1 + \frac{d}{m} \right)^m \leq e^d
+$$
+(V predposlednom kroku sme využili binomickú vetu.) Keď obe strany
+vydelíme $\left( \frac{d}{m} \right)^d$, dostaneme
+$$ \Phi_d(m) = \sum_{i=0}^d {m \choose i} \leq \left( \frac{em}{d} \right)^d. $$
+
+
+\paragraph{High-level dôkaz.} Pripomeňme si, že náš algoritmus je všemohúci,
+vždy teda vráti hypotézu konzistentnú s trénovacími príkladmi. Môžeme si
+to (podobne ako v prípade konečnej množiny hypotéz) predstaviť tak, že
+postupne si ťaháme trénovacie príklady, a každý trénovací príklad nám
+z hry vylúči tie hypotézy, ktoré sú s ním v rozpore. Otázka je, s akou
+pravdepodobnosťou do konca prežije nejaká zlá hypotéza?
+
+V konečnom prípade sme vedeli spraviť jednoduchú analýzu: počet zlých
+hypotéz bol nanajvýš $|H|$, a každá z nich prežije s pravdepodobnosťou
+nanajvýš $e^{-\varepsilon t}$ (lebo je zlá). V našom prípade ale
+$|H| = \infty$. Vďaka konečnej VC dimenzii ale vieme, že ak vezmeme
+v úvahu iba $m$ vstupov, tak rôznych hypotéz bude iba polynomiálne
+veľa. Vieme teda spraviť nasledovnú približnú úvahu:
+
+Predstavme si, že odmeriame OTeChHyp iba približne: namiesto toho, aby sme
+chybu merali na všetkých vstupoch $X$, vezmeme si iba náhodnú vzorku $m$
+testovacích príkladov a zmeriame chybu na nej. Množinu týchto príkladov
+označme $U$. Pre ľubovoľnú hypotézu $h$ je zrejme jej očakávaná chyba na $U$
+rovnaká, ako jej OTeCh:
+$$ \E_U \left[ \Err_U(h) \right] = \Err(h). $$
+
+Intuitívne, pre dostatočne veľké $m$ sa približná chyba $\Err_U(h)$ nebude
+veľmi líšiť od skutočnej. Toto sa dá poriadne popísať pomocou \emph{Chernoffovho odhadu};
+pre jednoduchosť argumentu zatiaľ budeme pracovať s tým, že s vysokou pravdepodobnosťou
+platí $\Err(h) \leq 2 \Err_U(h)$, takže ak je hypotéza $\frac{\varepsilon}{2}$-dobrá
+podľa testovacích príkladov, pravdepodobne je $\varepsilon$-dobrá.
+
+Pozrime sa teraz na celý proces. Na začiatku si náhodne
+vytiahneme $t$ trénovacích príkladov, na ktorých natrénujeme hypotézu $h$.
+Potom si vytiahneme ďalších $m$ testovacích príkladov, na ktorých odmeriame
+chybu $h$; podľa tohto merania prehlásime $h$ za asi-dobrú alebo asi-zlú.
+
+Všimnime si, že testovacie príklady nijak nezasahujú do trénovacieho
+procesu. Kľudne sme ich teda mohli vybrať hocikedy. Ten istý výsledok
+teda vieme dosiahnuť aj iným procesom: najprv vytiahneme $t + m$ príkladov,
+potom ich náhodne rozdelíme na $t$ trénovacích a $m$ testovacích, ďalej
+pokračujeme rovnako. Aká je výhoda tohto prístupu? Uvedomme si, že pre
+ľubovoľnú hypotézu $h$ platí
+$$ \Err_U(h) \leq \frac{t + m}{m} \cdot \Err_{(T \cup U)}(h). $$
+
+Takže každá hypotéza, ktorá je $\varepsilon$-zlá na $U$, je
+$\left( \frac{m}{t+m} \cdot \varepsilon \right)$-zlá na $T \cup U$.
+Z toho vyplýva
+$$ \Pr_{T, U} \left( \Err_U(\hat{h}_T) \geq \varepsilon \right) \leq \Pr_{T, U} \left( \Err_{(T \cup U)}(\hat{h}_T) \geq \frac{m}{t + m} \cdot \varepsilon \right). $$
+
+Položme $m = t$. Aká je pravdepodobnosť, že prežije aspoň jedna hypotéza,
+ktorá je $\frac{\varepsilon}{2}$-zlá na $T \cup U$? Týchto hypotéz je
+nanajvýš toľko, koľko je všetkých hypotéz na $T \cup U$, a tých je
+$\Phi_d(2t)$. Každá z nich prežije s pravdepodobnosťou nanajvýš
+$e^{-\frac{\varepsilon t}{2}}$. Dostávame tak odhad
+\begin{align}
+  \Pr_{T, U} \left( \Err_{(T \cup U)}(\hat{h}_T) \geq \frac{\varepsilon}{2} \right)
+    &\leq \Phi_d(2t) \cdot e^{-\frac{\varepsilon t}{2}}   \\
+    &\leq \left( \frac{2et}{d} \right)^d \cdot e^{-\frac{\varepsilon t}{2}}     \label{vc-dokaz:prob-asi-zle}
+\end{align}
+
+Prvý činiteľ rastie polynomiálne, zatiaľ čo druhý klesá exponenciálne.
+Dostatočne veľkým $t$ teda vieme zaručiť, že pravdepodobnosť asi-zlej
+hypotézy bude ľubovoľne malá. Ak chceme dosiahnuť, aby táto pravdepodobnosť
+bola nanajvýš $\delta$, stačí zvoliť $t$ nasledovne:
+$$ t = \Omega \left( \frac{1}{\varepsilon} \ln \frac{1}{\delta} + \frac{d}{\varepsilon} \ln \frac{1}{\varepsilon} \right) $$
+(Odvodenie tohto odhadu dávame pre čitateľnosť do samostatného
+\hyperref[vc-dokaz:analyza-asi-zla-h]{paragrafu}.)
+
+Zatiaľ sme ale pracovali iba s asi-zlými hypotézami. My chceme ale zhora
+odhadnúť pravdepodobnosť zlej hypotézy; môže sa ale stať, že nejakú zlú
+hypotézu prehlásime za asi-dobrú. Platí
+$$ \Pr_{T, U} \left( \hat{h}_T\ \text{je zlá} \right) \leq \Pr_{T, U} \left( \hat{h}_T\ \text{je asi-zlá} \right) + \Pr_{T, U} \left( \hat{h}_T\ \text{je asi-dobrá a zároveň je zlá} \right) $$
+
+Na odhad druhej pravdepodobnosti použijeme Chernoffov odhad: na to, aby
+$$ \Pr_{T, U} \left( \hat{h}_T\ \text{je asi-dobrá a zároveň je zlá} \right) \leq \delta, $$
+stačí zvoliť počet testovacích príkladov $m$ nasledovne:
+$$ m = \Omega \left( \frac{1}{\varepsilon} \ln \frac{1}{\delta} \right). $$
+(Presný spôsob použitia dávame pre čitateľnosť do samostatného
+\hyperref[vc-dokaz:chernoff]{paragrafu}.)
+
+V našom prípade $m = t$, a okrem toho chceme, aby celková pravdepodobnosť
+zlej hypotézy bola nanajvýš $\delta$. Na to stačí, keď budeme požadovať,
+aby oba komponenty boli nanajvýš $\delta/2$:
+$$ \Pr_{T, U} \left( \hat{h}_T\ \text{je asi-zlá} \right) \leq \frac{\delta}{2} \hspace{1cm} \text{a zároveň} \hspace{1cm} \Pr_{T, U} \left( \hat{h}_T\ \text{je asi-dobrá a zároveň je zlá} \right) \leq \frac{\delta}{2}. $$
+
+V oboch prípadoch dostaneme (asymptoticky) tú istú požiadavku na $m$,
+ako pôvodne. Spojením týchto požiadaviek dostaneme:
 
 \begin{theorem}[Blumer et. al., 1989 \cite{blumer1989learnability}]
   Ak je VC dimenzia konečná, tak je množina hypotéz $H$ PAC$\star$
@@ -618,6 +827,74 @@ odporúčame sekciu \hyperref[vcdim:proof]{appendix}.
   zlú hypotézu (s OTeCH aspoň $\varepsilon$) iba s malou
   pravdepodobnosťou (nanajvýš $\delta$).
 \end{theorem}
+
+
+\paragraph{Analýza pravdepodobnosti asi-zlej hypotézy.} \label{vc-dokaz:analyza-asi-zla-h}
+
+Chceme, aby pravdepodobnosť asi-zlej hypotézy bola nanajvýš $\delta$. Túto
+pravdepodobnosť sme zhora odhadli výrazom \ref{vc-dokaz:prob-asi-zle};
+stačí teda zvoliť také $t$, aby bol tento výraz menší rovný $\delta$:
+\begin{align}
+  \delta &\geq \left( \frac{2et}{d} \right)^d \cdot e^{-\frac{\varepsilon t}{2}}  \\
+  \ln \delta &\geq d \cdot \left( \ln 2 + 1 + \ln \frac{t}{d} \right) - \frac{\varepsilon t}{2}   \\
+  \frac{\varepsilon}{2} \cdot t &\geq \ln \frac{1}{\delta} + d \cdot \left( \ln 2 + 1 + \ln \frac{t}{d} \right)
+\end{align}
+Čo z asymptotického hľadiska znamená
+$$ \varepsilon t = \Omega \left( \ln \frac{1}{\delta} + d \ln \frac{t}{d} \right). $$
+Avšak $t$ vystupuje aj na pravej strane a potrebujeme sa ho zbaviť. Rozbime
+preto túto požiadavku na dve menšie požiadavky, ktoré budeme upravovať
+samostatne:
+$$ \varepsilon t = \Omega \left( \ln \frac{1}{\delta} \right) \hspace{1cm} \text{a} \hspace{1cm} \varepsilon t = \Omega \left( d \ln \frac{t}{d} \right). $$
+Prvá z nich je ekvivalentná $t = \Omega \left( \frac{1}{\varepsilon} \ln \frac{1}{\delta} \right)$.
+Druhá z nich je ekvivalentná nasledovnému:
+\begin{align}
+  \varepsilon \cdot \frac{\frac{t}{d}}{\ln \frac{t}{d}} &= \Omega(1)    \\
+  \frac{\frac{t}{d}}{\ln \frac{t}{d}} &= \Omega \left( \frac{1}{\varepsilon} \right)
+\end{align}
+Na splnenie tejto požiadavky stačí, aby platilo:
+\begin{align}
+  \frac{t}{d} &= \Omega \left( \frac{1}{\varepsilon} \ln \frac{1}{\varepsilon} \right)    \\
+  t &= \Omega \left( \frac{d}{\varepsilon} \ln \frac{1}{\varepsilon} \right)
+\end{align}
+Spojením týchto dvoch požiadaviek dostaneme
+$$ t = \Omega \left( \frac{1}{\varepsilon} \ln \frac{1}{\delta} + \frac{d}{\varepsilon} \ln \frac{1}{\varepsilon} \right). $$
+
+
+\paragraph{Analýza pravdepodobnosti asi-dobrej a zároveň zlej hypotézy.} \label{vc-dokaz:chernoff}
+
+Ukážeme, že ak je výstupná hypotéza $h$ zlá, ak odmeriame
+jej testovaciu chybu na $m$ náhodne vybraných príkladoch $U$ a $m$ je
+dostatočne veľké, tak iba s malou pravdepodobnosťou sa stane, že sa na $U$
+bude javiť ako dobrá.
+
+Nech $X_1, \ldots, X_m$ sú náhodné premenné zodpovedajúce chybám na
+jednotlivých testovacích príkladoch. Tieto premenné sú navzájom nezávislé;
+tiež sú identické, sú teda z toho istého rozdelenia: $X_i \sim X$. Každá
+z týchto chýb je buď $0$ alebo $1$, teda $X$ je Bernoulliho náhodná
+premenná a jej očakávanú hodnotu označíme $p$. Chceme porovnať
+$$ \frac{X_1 + \ldots + X_m}{m} \hspace{1cm} \text{a} \hspace{1cm} \E \left[ X \right]. $$
+
+Podľa Chernoffovho odhadu pre ľubovoľné $0 \leq \gamma \leq 1$ platí
+$$ \Pr \left( X_1 + \ldots + X_m < (1 - \gamma) pm \right) \leq e^\frac{-mp \gamma^2}{2} $$
+
+Zvoľme $\gamma = 1/2$. Ak je hypotéza $h$ $\varepsilon$-zlá, tak jej
+OTeCh je aspoň $\varepsilon$, teda $p \geq \varepsilon$. Dostaneme tak
+odhad
+$$ \Pr \left( \frac{X_1 + \ldots + X_m}{m} < \frac{p}{2} \right) \leq \left( e^\frac{-\varepsilon}{8} \right)^m $$
+
+My chceme, aby pravdepodobnosť toho, že sa bude javiť ako dobrá na $U$,
+bola nanajvýš $\delta$. Stačí teda zvoliť $m$ tak, aby pravá strana bola
+nanajvýš $\delta$. Upravujme:
+\begin{align}
+  \delta &\geq \left( e^\frac{-\varepsilon}{8} \right)^m  \\
+  \ln \delta &\geq m \cdot \frac{-\varepsilon}{8} \\
+  m \cdot \frac{\varepsilon}{8} &\geq \ln \frac{1}{\delta}  \\
+  m &\geq \frac{8}{\varepsilon} \ln \frac{1}{\delta} \\
+  m &= \Omega \left( \frac{1}{\varepsilon} \ln \frac{1}{\delta} \right)
+\end{align}
+
+
+\paragraph{Ďalšie vety, už bez dôkazov.}
 
 \begin{theorem}[Haussler et. al., 1994 \cite{haussler1994predicting}]
   OTeChAlg vieme zhora asymptoticky odhadnúť nasledovne:

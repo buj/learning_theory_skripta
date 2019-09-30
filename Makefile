@@ -5,3 +5,6 @@ main:
 
 obrazky:
 	cd obrazky; asy *.asy -f pdf; cd ..
+
+clean:
+	rm *.log *.aux *.out *.bbl *.blg *.toc
